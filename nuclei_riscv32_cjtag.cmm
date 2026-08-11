@@ -1,0 +1,18 @@
+
+area.clear
+area
+RESet
+SYStem.CONFIG.DebugPortType CJTAG
+SYStem.CONFIG.CJTAGFLAGS NOTCA NOKEEPER NOHARDESC CMDRTI SKIPDUMMYSP SKIPMASK 0xF CPKTSEL 1
+
+SYStem.jtagclock 10MHz
+SYStem.Option.RESetmode NDMRST
+SYStem.cpu RV32
+SETUP.DIS AbiNames
+
+SYStem.Up
+
+apu.load ~~~~/nuclei_custom_inst_parser.dll
+per ~~~~/nuclei_custom_csr_parser.per
+
+enddo

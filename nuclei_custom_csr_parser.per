@@ -1,0 +1,1553 @@
+; --------------------------------------------------------------------------------
+; @Title: RISC-V On-Chip Peripherals
+; @Props: Released
+; @Author: MAG, MJW, NEJ
+; @Changelog: 2018-06-07 MAG
+;             2018-08-23 MJW
+;             2022-02-08 NEJ
+;             2024-09-04 NEJ
+; @Doc: priv-isa-asciidoc_20240411.pdf (Rev. 20240411, 2024-04-11)
+; @Core: RISC-V
+; @Chip: RV32, RV64
+; @Copyright: (C) 1989-2024 Lauterbach GmbH, licensed for use with TRACE32(R) only
+; --------------------------------------------------------------------------------
+; $Id: perriscv.per 18313 2024-09-05 14:22:28Z kwisniewski $
+
+ASSERT VERSION.BUILD()>=97333. "Required TRACE32 build 97333 or newer"
+
+ASSERT CPUFAMILY()=="RISCV" "Use this peripheral file with TRACE32 for RISC-V"
+
+ASSERT VERSION.BUILD.BASE()>=80109.
+
+sif PER.isNOTIFICATION()
+  base AVM:0x00000000
+  wgroup AVM:0x00++0
+    textline " Peripheral File Notification - "
+    button "show missing files" "DIALOG.MESSAGE ""Please check your installation for the possibly missing files:""+CONV.CHAR(0xa)+PER.NOTIFICATION.MISSINGFILES()"
+    textline " ---------------------------------------------------------------"
+    textline " The peripheral file for this SoC cannot be displayed.          "
+    textline " Possible reasons are:                                          "
+    textline " - it is missing in the local installation or under development "
+    textline " - it is confidential                                           "
+    textline "                                                                "
+    textline " As fallback only the core registers are shown.                 "
+    textline " Please check    www.lauterbach.com/scripts.html                "
+    textline " or contact      support@lauterbach.com .                       "
+    textline "                                                                "
+endif
+WAIT
+
+tree "Control and Status Registers (CSR)"
+    base CSR:0x00000000
+SIF (!CPUIS64BIT())
+AUTOINDENT.ON CENTER TREE
+tree "Customized CSRs in the Nuclei processor core"
+  group.long (0x307*4)++3.
+      line.long 0x00 "MTVT,ECLIC Interrupt Vector Table Base Address"
+  group.long (0x346*4)++3.
+      line.long 0x00 "MINTSTATUS,Current Interrupt Level. mintstatus register"
+          bitfld.long 0x00 24.--31. "MIL,The active interrupt level in machine mode"
+          newline
+          bitfld.long 0x00 0.--7. "UIL,The active interrupt level in user mode"
+  group.long (0x348*4)++3.
+      line.long 0x00 "MSCRATCHCSW,Scratch swap register for privileged mode"
+  group.long (0x349*4)++3.
+      line.long 0x00 "MSCRATCHCSWL,Scratch swap register for privileged mode"
+  group.long (0x390*4)++3.
+      line.long 0x00 "MLWID,WorldGuard for security"
+  group.long (0x5F0*4)++3.
+      line.long 0x00 "SATTRI0_BASE,Base address of Secure Region 0 to set attribute"
+          bitfld.long 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0x5F1*4)++3.
+      line.long 0x00 "SATTRI0_MASK,Mask(size) of Secure Region 0 to set attribute"
+  group.long (0x5F2*4)++3.
+      line.long 0x00 "SATTRI1_BASE,Base address of Secure Region 1 to set attribute"
+          bitfld.long 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0x5F3*4)++3.
+      line.long 0x00 "SATTRI1_MASK,Mask(size) of Secure Region 1 to set attribute"
+  group.long (0x5F4*4)++3.
+      line.long 0x00 "SATTRI2_BASE,Base address of Secure Region 2 to set attribute"
+          bitfld.long 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0x5F5*4)++3.
+      line.long 0x00 "SATTRI2_MASK,Mask(size) of Secure Region 2 to set attribute"
+  group.long (0x5F6*4)++3.
+      line.long 0x00 "SATTRI3_BASE,Base address of Secure Region 3 to set attribute"
+          bitfld.long 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0x5F7*4)++3.
+      line.long 0x00 "SATTRI3_MASK,Mask(size) of Secure Region 3 to set attribute"
+  group.long (0x5F8*4)++3.
+      line.long 0x00 "SATTRI4_BASE,Base address of Secure Region 4 to set attribute"
+          bitfld.long 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0x5F9*4)++3.
+      line.long 0x00 "SATTRI4_MASK,Mask(size) of Secure Region 4 to set attribute"
+  group.long (0x5FA*4)++3.
+      line.long 0x00 "SATTRI5_BASE,Base address of Secure Region 5 to set attribute"
+          bitfld.long 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0x5FB*4)++3.
+      line.long 0x00 "SATTRI5_MASK,Mask(size) of Secure Region 5 to set attribute"
+  group.long (0x5FC*4)++3.
+      line.long 0x00 "SATTRI6_BASE,Base address of Secure Region 6 to set attribute"
+          bitfld.long 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0x5FD*4)++3.
+      line.long 0x00 "SATTRI6_MASK,Mask(size) of Secure Region 6 to set attribute"
+  group.long (0x5FE*4)++3.
+      line.long 0x00 "SATTRI7_BASE,Base address of Secure Region 7 to set attribute"
+          bitfld.long 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0x5FF*4)++3.
+      line.long 0x00 "SATTRI7_MASK,Mask(size) of Secure Region 7 to set attribute"
+  group.long (0x7C0*4)++3.
+      line.long 0x00 "MILM_CTL,Enable/Disabled the ILM address space. milm_ctl register"
+          bitfld.long 0x00 10.--31. "ILM_BPA,The base physical address of ILM"
+          newline
+          bitfld.long 0x00 6. "DIS_LSU_ILM,Disabled LSU access ILM" "Enabled,Disabled"
+          newline
+          bitfld.long 0x00 5. "ILM_VA_EN,Use virtual address for ILM access" "Not used,Used"
+          newline
+          bitfld.long 0x00 4. "ILM_ECC_CHK_EN,Controls to check the ECC Code or not when core access to ILM." "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 3. "ILM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to ILM" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 2. "ILM_ECC_EXCP_EN,ILM double bit ECC exception enable control" "No exception,Exception"
+          newline
+          bitfld.long 0x00 1. "ILM_ECC_EN,ILM ECC feature enable control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 0. "ILM_ENABLE,Instruction Local Memory enable bit" "Disabled,Enabled"
+  group.long (0x7C1*4)++3.
+      line.long 0x00 "MDLM_CTL,Enable/Disabled the DLM address space. mdlm_ctl register"
+          bitfld.long 0x00 10.--31. "DLM_BPA,The base physical address of DLM"
+          newline
+          bitfld.long 0x00 5. "DIS_LSU_DLM,Disabled LSU access DLM" "Enabled,Disabled"
+          newline
+          bitfld.long 0x00 4. "DLM_ECC_CHK_EN,Controls to check the ECC Code or not when core access to DLM" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 3. "DLM_ECC_INJ_EN,Controls to inject the ECC Code in CSRmecc_code to DLM" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 2. "DLM_ECC_EXCP_EN,DLM double bit ECC exception enable control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 1. "DLM_ECC_EN,DLM ECC enable feature control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 0. "DLM_ENABLE,Data Local Memory enable bit" "Disabled,Enabled"
+  group.long (0x7C2*4)++3.
+      line.long 0x00 "MECC_CODE,ECC code injection register, can be used to simulate ECC error.mecc_code register"
+          bitfld.long 0x00 24.--28. "SRAMID,The ID of RAM that has single bit ECC errors" "I-Cache,D-Cache,Main TLB,ILM,DLM"
+          newline
+          bitfld.long 0x00 16.--20. "RAMID,The ID of RAM that has double bit ECC errors" "I-Cache,D-Cache,Main TLB,ILM,DLM"
+          newline
+          bitfld.long 0x00 9.--15.  "RSVD,Reserved"
+          newline
+          bitfld.long 0x00 0.--8.   "CODE,ECC code for injection"
+  group.long (0x7C3*4)++3.
+      line.long 0x00 "MNVEC,Customized register used to indicate the NMI handler entry address"
+  group.long (0x7C4*4)++3.
+      line.long 0x00 "MSUBM,Customized register storing current trap type and the previous.msubm register trap type before trapped"
+          bitfld.long 0x00 8.--9. "PTYP,Machine sub-mode before entering the trap" "Normal Machine Mode,Interrupt Handling Mode,Exception Handling Mode,NMI Handling Mode"
+          newline
+          bitfld.long 0x00 6.--7. "TYP,Current sub-mode" "Normal Machine Mode,Interrupt Handling Mode,Exception Handling Mode,NMI Handling Mode"
+  group.long (0x7C6*4)++3.
+      line.long 0x00 "MSTACK_CTL,Customized register to control Stack Check function.mstack_ctl register"
+          bitfld.long 0x00 2. "MODE,Mode of stack checking" "Overflow and Underflow check,Track the stack top"
+          newline
+          bitfld.long 0x00 1. "UDF_EN,Stack underflow check enable" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 0. "OVF_TRACK_EN,Stack overflow check or track enable" "Disabled,Enabled"
+  group.long (0x7C7*4)++3.
+      line.long 0x00 "MSTACK_BOUND,Customized register to store the bound of or track stack top for Stack Check. mstack_bound register"
+          bitfld.long 0x00 0.--31. "BOUND,Stack top’s value for stack overflow check or track (Default value is all ones)"
+  group.long (0x7C8*4)++3.
+      line.long 0x00 "MSTACK_BASE,Customized register to store the stack base for Stack Check.mstack_base register"
+          bitfld.long 0x00 0.--31. "BASE,Stack base’s value for stack underflow check (Default value is all ones)"
+  group.long (0x7C9*4)++3.
+      line.long 0x00 "MDCAUSE,Customized register storing current trap’s detailed cause. mdcause register"
+      if (((per.l(CSR:0x342))&0xFFF)==1.)
+          group.long (0x7C9*4)++3.
+          bitfld.long 0x00 0.--2. "MDCAUSE,Instruction access fault detail" ",PMP  permission violation,Bus error,,,,,ECC error"
+      elif (((per.l(CSR:0x342))&0xFFF)==5.)
+          group.long (0x7C9*4)++3.
+          bitfld.long 0x00 0.--2. "MDCAUSE,Load access fault detail" ",PMP permission violation bus error,Bus error caused by core memory read,Bus error caused by NICE write back,,,,ECC error"
+      elif (((per.l(CSR:0x342))&0xFFF)==7.)
+          group.long (0x7C9*4)++3.
+          bitfld.long 0x00 0.--2. "MDCAUSE,Store/AMO access fault detail" ",PMP permission violation bus error,Bus error caused by core memory write,,,,,ECC error"
+      elif (((per.l(CSR:0x342))&0xFFF)==12.)
+          group.long (0x7C9*4)++3.
+          bitfld.long 0x00 0.--2. "MDCAUSE,Instruction page fault detail" ",,,,,MMU fault,SMPU fault,ECC error"
+      elif (((per.l(CSR:0x342))&0xFFF)==13.)
+          group.long (0x7C9*4)++3.
+          bitfld.long 0x00 0.--2. "MDCAUSE,Load page fault detail" ",,,,,MMU fault,Load page fault bus error caused by SMPU,ECC error"
+      elif (((per.l(CSR:0x342))&0xFFF)==15.)
+          group.long (0x7C9*4)++3.
+          bitfld.long 0x00 0.--2. "MDCAUSE,Store page fault detail" ",,,,,MMU fault,Store page fault bus error caused by SMPU,ECC error"
+      endif
+  group.long (0x7CA*4)++3.
+      line.long 0x00 "MCACHE_CTL,Customized register to control the Cache features"
+          bitfld.long 0x00 23. "DC_BURST_TYPE,D-Cache Burst type control" "WRAP,INCR"
+          newline
+          bitfld.long 0x00 22. "DC_PREFETCH_EN,D-Cache CMO prefetch enable control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 21. "DC_ECC_CHK_EN,Controls to check the ECC Code when core access to D-Cache" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 20. "DC_DRAM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to D-Cache data rams" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 19. "DC_TRAM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to D-Cache tag rams" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 18. "DC_ECC_EXCP_EN,D-Cache double bit ECC exception enable control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 17. "DC_ECC_EN,D-Cache ECC enable control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 16. "DC_EN,D-Cache enable control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 10. "IC_BURST_TYPE,I-Cache Burst type control" "WRAP,INCR"
+          newline
+          bitfld.long 0x00 9. "IC_PREFETCH_EN,I-Cache CMO prefetch enable control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 8. "IC_ECC_CHK_EN,Controls to check the ECC when core access to I-Cache" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 7. "IC_CANCEL_EN,I-Cache change flow canceling enable control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 6. "IC_PF_EN,I-Cache prefetch enable control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 5. "IC_DRAM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to I-Cache data rams" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 4. "IC_TRAM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to I-Cache tag rams" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 3. "IC_ECC_EXCP_EN,I-Cache double bit ECC exception enable control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 2. "IC_ECC_EN,I-Cache ECC enable control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 1. "IC_SCPD_MOD,I-Cache Scratchpad Mode enable control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 0. "IC_EN,I-Cache enable control" "Disabled,Enabled"
+  group.long (0x7D0*4)++3.
+      line.long 0x00 "MMISC_CTL,Customized register controlling the selection of the NMI Handler"
+          bitfld.long 0x00 17. "CSR_EXCL_ENABLE,Exclusive instruction(lr,sc) on Non-cacheable/Device memory can send exclusive flag in memory bus" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 12. "LDSPEC_ENABLE,Enable or disable the Load Speculative goes to Mem Interface" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 11. "SIUMP_ENABLE,Control the SIUMP mode of trace if Encoder inside Core" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 10. "IMRETURN_ENABLE,Control the IMRETURN mode of trace if Encoder inside Core" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 9. "NMI_CAUSE_FFF,Control mvec and mcause.EXCODE of NMI" "mnvec = PC address && mcause.EXCCODE of NMI is 0x1,mnvec = mtvec && mcause.EXCCODE of NMI is 0xfff"
+          newline
+          bitfld.long 0x00 8. "CORE_BUS_ERR,Control the bus error caused by core is exception or interrupt" "Exception,Interrupt"
+          newline
+          bitfld.long 0x00 7. "ZCMT_ZCMP_EN,Control the ZCMP and ZCMT Ext uses the Zcd extension encoding or not" "Zcd encoding,ZCMP and ZCMT encoding"
+          newline
+          bitfld.long 0x00 6. "UNAGING_ENABLE,Enable or disable misaligned load/store access" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 3. "BPU_ENABLE,Enable or disable the BPU Unit" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 1. "ZCLSD_EN,Control the Zclsd will uses the Zcf extension encoding or not" "Zcf,Zclsd"
+  group.long (0x7DD*4)++3.
+      line.long 0x00 "MTLB_CTL,Customized register to control the TLB"
+          bitfld.long 0x00 7 "NAPOT_EN,Napot page enable" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 6 "TLB_ECC_CHK_EN,Controls to check the ECC when core access to MTLB" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 3 "TLB_DRAM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to MTLB data rams" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 2 "TLB_TRAM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to MTLB tag rams" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 1 "TLB_ECC_EXCP_EN,MTLB double bit ECC exception enable control" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 0 "TLB_ECC_EN,MTLB ECC enable control" "Disabled,Enabled"
+  group.long (0x7DE*4)++3.
+      line.long 0x00 "MECC_LOCK,To lock ECC configure registers,then all the ECC related CSRs cannot"
+          bitfld.long 0x00 0. "ECC_LOCK,To lock ECC related CSRs" "Not locked,locked"
+  group.long (0x7E2*4)++3.
+      line.long 0x00 "MMISC_CTL1,Customized register used to set 16 bit float precision mode"
+          bitfld.long 0x00 6. "RVV_VL_0_CMPT,Control some vpu instruction behaviour is compatible with rvv1.0" "Not compatible,Compatible"
+          newline
+          bitfld.long 0x00 5. "VLM_PATH_EN,Control vlm dedicated path enable" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 4. "VLSU_COF_EN,Control the enable of vlsu check-only first feature" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 3. "VLSU_OOO_EN,Control the enable of vlsu ooo feature" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 2. "VLSU_OOO_FORCE_VA_4K,Control the size of virtual address check region for vlsu ooo" "By vlsu_ooo_4k_mode,Force 4KB"
+          newline
+          bitfld.long 0x00 1. "VLSU_OOO_4K_MODE,Control the size of address check region for vlsu ooo" "1MB,4KB"
+          newline
+          bitfld.long 0x00 0. "FP16MODE,16 bit float precision mode" "Normal mode,Bfloat16"
+  group.long (0x7EB*4)++3.
+      line.long 0x00 "PUSHMSUBM,Customized register used to push the value of msubm into the stack memory"
+  group.long (0x7EC*4)++3.
+      line.long 0x00 "MTVT2,Customized register used to indicate the common handler entry address of non-vectored interrupts"
+          bitfld.long 0x00 2.--31. "COMMON-CODE-ENTRY,When mtvt2.MTVT2EN=1 this field determines the entry address of interrupt common code in ECLIC non-vector mode"
+          newline
+          bitfld.long 0x00 0. "MTVT2EN,mtvt2 enable" "The entry address determined by mtvec,The entry address determined by mtvt2.COMMON-CODE-ENTRY"
+  group.long (0x7ED*4)++3.
+      line.long 0x00 "JALMNXTI,Customized register used to enable the ECLIC interrupt.The read operation of this register will take the next interrupt,return the entry address of next interrupt handler,and jump to the corresponding handler at the same time"
+  group.long (0x7EE*4)++3.
+      line.long 0x00 "PUSHMCAUSE,Customized register used to push the value of mcause into the stack memory"
+  group.long (0x7EF*4)++3.
+      line.long 0x00 "PUSHMEPC,Customized register used to push the value of mepc into the stack memory"
+  group.long (0x7f0*4)++3.
+      line.long 0x00 "MPPICFG_INFO,PPI Configuration Information"
+          bitfld.long 0x00 10.--31. "PPI_BPA,The base physical address of PPI and has to be aligned to multiple of PPI size"
+          newline
+          bitfld.long 0x00 9. "PPI_EN,PPI Enable" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 1.--5. "PPI_SIZE,Indicates the size of PPI and it should be power of 2" ",1KB,2KB,4KB,8KB,16KB,32KB,64KB,128KB,256KB,512KB,1MB,2MB,4MB,8MB,16MB,32MB,64MB,128MB,256MB,512MB,1GB,2GB,?..."
+          newline
+          bitfld.long 0x00 0. "RSVD,Reserved" "1"
+  group.long (0x7F1*4)++3.
+      line.long 0x00 "MFIOCFG_INFO,FIO Configuration Information"
+          bitfld.long 0x00 10.--31. "FIO_BPA,The base physical address of FIO and has to be aligned to multiple of FIO size"
+          newline
+          bitfld.long 0x00 1.--5. "FIO_SIZE,Indicates the size of FIO and it should be power of 2" ",1KB,2KB,4KB,8KB,16KB,32KB,64KB,128KB,256KB,512KB,1MB,2MB,4MB,8MB,16MB,32MB,64MB,128MB,256MB,512MB,1GB,2GB,?..."
+          newline
+          bitfld.long 0x00 0. "RSVD,Reserved" "1"
+  group.long (0x7F3*4)++3.
+      line.long 0x00 "MATTRI0_BASE,Base address of Region 0 to set attribute"
+          bitfld.long 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.long 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.long 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.long 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0x7F4*4)++3.
+      line.long 0x00 "MATTRI0_MASK,Mask(size) of Region 0 to set attribute"
+  group.long (0x7F5*4)++3.
+      line.long 0x00 "MATTRI1_BASE,Base address of Region 1 to set attribute"
+          bitfld.long 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.long 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.long 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.long 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0x7F6*4)++3.
+      line.long 0x00 "MATTRI1_MASK,Mask(size) of Region 1 to set attribute"
+  group.long (0x7F9*4)++3.
+      line.long 0x00 "MATTRI2_BASE,Base address of Region 2 to set attribute"
+          bitfld.long 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.long 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.long 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.long 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0x7FA*4)++3.
+      line.long 0x00 "MATTRI2_MASK,Mask(size) of Region 2 to set attribute"
+  group.long (0x7fb*4)++3.
+      line.long 0x00 "MATTRI3_BASE,Base address of Region 3 to set attribute"
+          bitfld.long 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.long 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.long 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.long 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0x7FC*4)++3.
+      line.long 0x00 "MATTRI3_MASK,Mask(size) of Region 3 to set attribute"
+  group.long (0x7FD*4)++3.
+      line.long 0x00 "MATTRI4_BASE,Base address of Region 4 to set attribute"
+          bitfld.long 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.long 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.long 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.long 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0x7FE*4)++3.
+      line.long 0x00 "MATTRI4_MASK,Mask(size) of Region 4 to set attribute"
+  group.long (0x7f7*4)++3.
+      line.long 0x00 "MIRGB_INFO,IREGION Configuration Information"
+          bitfld.long 0x00 1.--5. "IREGION_SIZE,Indicates the size of IREGION and it should be power of 2" ",1KB,2KB,4KB,8KB,16KB,32KB,64KB,128KB,256KB,512KB,1MB,2MB,4MB,8MB,16MB,32MB,64MB,128MB,256MB,512MB,1GB,2GB,?..."
+          newline
+          bitfld.long 0x00 0. "RSVD,Reserved" "1"
+  group.long (0x810*4)++3.
+      line.long 0x00 "WFE,Customized register used to control the WFE mode"
+          bitfld.long 0x00 1. "IRQ_WAKEUP_WFE_EN,Control whether the processor should be awakened by interrupt or event" "Not can,Can"
+          newline
+          bitfld.long 0x00 0. "WFE,Control whether the processor should be awakened by interrupt or event" "By interrupt and NMI in sleep mode,By event and NMI in sleep mode"
+  group.long (0x811*4)++3.
+      line.long 0x00 "SLEEPVALUE,Customized register used to indicate the WFI sleep mode"
+          bitfld.long 0x00 0. "SLEEPVALUE,Control WFI sleep mode" "Shallow sleep mode,Deep sleep mode"
+  group.long (0x812*4)++3.
+      line.long 0x00 "TXEVT,Customized register used to send an event"
+          bitfld.long 0x00 0. "TXEVT,Event control" "No action,The core will trigger a single-cycle pulse output signal tx_evt as event signal"
+  group.long (0x801*4)++3.
+      line.long 0x00 "UCODE,Overflow flag of the P extension"
+          bitfld.long 0x00 0. "OV,Record if there is overflow happened in DSP instructions" "Not overflow,Overflow"
+  group.long (0xBC0*4)++3.
+      line.long 0x00 "MECC_CTL,ECC Control Register"
+          bitfld.long 0x00 31. "IO_PROT_CHK_EN,Controls to check the IO interface" "Not check,Check"
+          newline
+          bitfld.long 0x00 9. "DC_CPBK_MSK,Write 1 to disable aggregate DCache CPBK ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 8. "DC_CCM_MSK,Write 1 to disable aggregate DCache CCM ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 7. "IC_CCM_MSK,Write 1 to disable aggregate ICache CCM ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 6. "DLM_EXT_MSK,Write 1 to disable aggregate DLM external access ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 5. "ILM_EXT_MSK,Write 1 to disable aggregate ILM external access ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 4. "DC_ACC_MSK,Write 1 to disable aggregate DCache access ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 3. "IC_FCH_MSK,Write 1 to disable aggregate ICache fetch ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 2. "DLM_ACC_MSK,Write 1 to disable aggregate DLM access ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 1. "ILM_ACC_MSK,Write 1 to disable aggregate ILM load/store access ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 0. "ILM_FCH_MSK,Write 1 to disable aggregate ILM fetch ECC fatal error to safety_error output" "Disabled,Enabled"
+  group.long (0xBC4*4)++3.
+      line.long 0x00 "MECC_STATUS,ECC Status and Control Register"
+          bitfld.long 0x00 9. "DC_CPBK_ERR,DCache CPBK ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.long 0x00 8. "DC_CCM_ERR,DCache CCM ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.long 0x00 7. "IC_CCM_ERR,ICache CCM ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.long 0x00 6. "DLM_EXT_ERR,DLM external access ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.long 0x00 5. "ILM_EXT_ERR,ILM external access ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.long 0x00 4. "DC_ACC_ERR,DCache access ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.long 0x00 3. "IC_FCH_ERR,ICache fetch ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.long 0x00 2. "DLM_ACC_ERR,DLM access ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.long 0x00 1. "ILM_ACC_ERR,ILM load/store access ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.long 0x00 0. "ILM_FCH_ERR,ILM fetch ECC fatal error has occurred" "No error,Error"
+  group.long (0xBC8*4)++3.
+      line.long 0x00 "MMACRO_DEV_EN,Enable Bit for Dev Region setting in RTL Configuration Stage"
+          bitfld.long 0x00 7 "entry7_en,Controls to enable for Dev Region entry7" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 6 "entry6_en,Controls to enable for Dev Region entry6" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 5 "entry5_en,Controls to enable for Dev Region entry5" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 4 "entry4_en,Controls to enable for Dev Region entry4" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 3 "entry3_en,Controls to enable for Dev Region entry3" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 2 "entry2_en,Controls to enable for Dev Region entry2" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 1 "entry1_en,Controls to enable for Dev Region entry1" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 0 "entry0_en,Controls to enable for Dev Region entry0" "Disabled,Enabled"
+  group.long (0xBC9*4)++3.
+      line.long 0x00 "MMACRO_NOC_EN,Enable Bit for Non-Cacheable Region setting in RTL Configuration Stage"
+          bitfld.long 0x00 7 "entry7_en,Controls to enable for Non-Cacheable Region entry7" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 6 "entry6_en,Controls to enable for Non-Cacheable Region entry6" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 5 "entry5_en,Controls to enable for Non-Cacheable Region entry5" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 4 "entry4_en,Controls to enable for Non-Cacheable Region entry4" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 3 "entry3_en,Controls to enable for Non-Cacheable Region entry3" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 2 "entry2_en,Controls to enable for Non-Cacheable Region entry2" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 1 "entry1_en,Controls to enable for Non-Cacheable Region entry1" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 0 "entry0_en,Controls to enable for Non-Cacheable Region entry0" "Disabled,Enabled"
+  group.long (0xBCA*4)++3.
+      line.long 0x00 "MMACRO_CA_EN,Enable Bit for Cacheable Region setting in RTL Configuration Stage"
+          bitfld.long 0x00 7 "entry7_en,Controls to enable for Cacheable Region entry7" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 6 "entry6_en,Controls to enable for Cacheable Region entry6" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 5 "entry5_en,Controls to enable for Cacheable Region entry5" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 4 "entry4_en,Controls to enable for Cacheable Region entry4" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 3 "entry3_en,Controls to enable for Cacheable Region entry3" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 2 "entry2_en,Controls to enable for Cacheable Region entry2" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 1 "entry1_en,Controls to enable for Cacheable Region entry1" "Disabled,Enabled"
+          newline
+          bitfld.long 0x00 0 "entry0_en,Controls to enable for Cacheable Region entry0" "Disabled,Enabled"
+  group.long (0xBE0*4)++3.
+      line.long 0x00 "MATTRI5_BASE,Base address of Region 5 to set attribute"
+          bitfld.long 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.long 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.long 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.long 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0xBE1*4)++3.
+      line.long 0x00 "MATTRI5_MASK,Mask(size) of Region 5 to set attribute"
+  group.long (0xBE2*4)++3.
+      line.long 0x00 "MATTRI6_BASE,Base address of Region 6 to set attribute"
+          bitfld.long 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.long 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.long 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.long 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0xBE3*4)++3.
+      line.long 0x00 "MATTRI6_MASK,Mask(size) of Region 6 to set attribute"
+  group.long (0xBE4*4)++3.
+      line.long 0x00 "MATTRI7_BASE,Base address of Region 7 to set attribute"
+          bitfld.long 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.long 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.long 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.long 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.long (0xBE5*4)++3.
+      line.long 0x00 "MATTRI7_MASK,Mask(size) of Region 7 to set attribute"
+  group.long (0xDC0*4)++3.
+      line.long 0x00 "SHARTID,HARTID for S-Mode."
+  group.long (0xFC0*4)++3.
+      line.long 0x00 "MICFG_INFO,ILM and I-Cache configuration information"
+          bitfld.long 0x00 22. "ILM_ECC,ECC support for the instruction local memory (ILM)" "Not Support,Support"
+          newline
+          bitfld.long 0x00 16.--20. "ILM_SIZE,Indicates the size of ILM and the size should be power of 2" "0B,256B,512B,1KB,2KB,4KB,8KB,16KB,32KB,64KB,128KB,256KB,512KB,1MB,2MB,4MB,8MB,16MB,32MB,64MB,128MB,256MB,512MB,?..."
+          newline
+          bitfld.long 0x00 10. "IC_ECC,ECC support for the I-Cache" "Not Support,Support"
+          newline
+          bitfld.long 0x00 7.--9. "IC_LSIZE,I-Cache line size" "No I-Cache,8B,16B,32B,64B,128B,?..."
+          newline
+          bitfld.long 0x00 4.--6. "IC_WAY,I-Cache ways" "Direct-mapped,2-way,3-way,4-way,5-way,6-way,7-way,8-way"
+          newline
+          bitfld.long 0x00 0.--3. "IC_SET,I-Cache sets per way" "8,16,32,64,128,256,512,1024,2048,4096,8192,?..."
+  group.long (0xFC1*4)++3.
+      line.long 0x00 "MDCFG_INFO,DLM and D-Cache configuration information"
+          bitfld.long 0x00 21. "DLM_ECC,ECC support for the data local memory (DLM)" "Not Support,Support"
+          newline
+          bitfld.long 0x00 16.--20. "DLM_SIZE,Indicates the size of DLM and the size should be power of 2" "0B,256B,512B,1KB,2KB,4KB,8KB,16KB,32KB,64KB,128KB,256KB,512KB,1MB,2MB,4MB,8MB,16MB,32MB,64MB,128MB,256MB,512MB,?..."
+          newline
+          bitfld.long 0x00 10. "DC_ECC,ECC support for the D-Cache" "Not Support,Support"
+          newline
+          bitfld.long 0x00 7.--9. "DC_LSIZE,D-Cache line size" "No D-Cache,8B,16B,32B,64B,128B,?..."
+          newline
+          bitfld.long 0x00 4.--6. "DC_WAY,D-Cache ways" "Direct-mapped,2-way,3-way,4-way,5-way,6-way,7-way,8-way"
+          newline
+          bitfld.long 0x00 0.--3. "DC_SET,D-Cache sets per way" "8,16,32,64,128,256,512,1024,2048,4096,8192,?..."
+  group.long (0xFC2*4)++3.
+      line.long 0x00 "MCFG_INFO,Processor configuration information"
+          bitfld.long 0x00 26. "SSTC,Indicate Core supports SSTC RISC-V extension or not" "Not Support,Support"
+          newline
+          bitfld.long 0x00 25. "ZILSD,Indicate Core supports ZILSD/ZCLSD RISC-V extension or not" "Not Support,Support"
+          newline
+          bitfld.long 0x00 24. "XLCZ,Indicate Core supports XLCZ or not" "Support,Not support"
+          newline
+          bitfld.long 0x00 23. "VNICE,Indicate Core supports VNICE or not" "Not support,Support"
+          newline
+          bitfld.long 0x00 21.--22. "SAFETY_MECHANISM,Indicate Core's safety mechanism" "No Safety,Lockstep,Lockstep + Split,ASIL-B"
+          newline
+          bitfld.long 0x00 20. "ETRACE,Indicate Core supports Etrace or not" "Not support,Support"
+          newline
+          bitfld.long 0x00 19. "SEC_MODE,Indicate Core supports Smwg Extension or not" "Not support,Support"
+          newline
+          bitfld.long 0x00 17.--18. "VPU_DEGREE,Indicate the VPU degree of parallel" "DLEN=VLEN/2,DLEN=VLEN,?..."
+          newline
+          bitfld.long 0x00 16. "IREGION_EXIST,Shows the IREGION exist or not" "Not exist,Exists"
+          newline
+          bitfld.long 0x00 15. "ZC_XLCZ_EXT,Indicate Core supports Zc and Xlcz Extension or not" "Not support,Support"
+          newline
+          bitfld.long 0x00 14. "DSP_N3,Global configuration for DSP N3 Extension Support" "Not support,Support"
+          newline
+          bitfld.long 0x00 13. "DSP_N2,Global configuration for DSP N2 Extension Support" "Not support,Support"
+          newline
+          bitfld.long 0x00 12. "DSP_N1,Global configuration for DSP N1 Extension Support" "Not support,Support"
+          newline
+          bitfld.long 0x00 11. "SMP,Global configuration for SMP support" "Not support,Support"
+          newline
+          bitfld.long 0x00 10. "DCACHE,Global configuration for D-Cache support" "Not support,Support"
+          newline
+          bitfld.long 0x00 9.  "ICACHE,Global configuration for I-Cache support" "Not support,Support"
+          newline
+          bitfld.long 0x00 8. "DLM,Global configuration for DLM support" "Not support,Support"
+          newline
+          bitfld.long 0x00 7. "ILM,Global configuration for ILM support" "Not support,Support"
+          newline
+          bitfld.long 0x00 6. "NICE,Global configuration for NICE support" "Not support,Support"
+          newline
+          bitfld.long 0x00 5. "PPI,Global configuration for PPI support" "Not support,Support"
+          newline
+          bitfld.long 0x00 4. "FIO,Global configuration for FIO support" "Not support,Support"
+          newline
+          bitfld.long 0x00 3. "PLIC,Global configuration for PLIC support" "Not support,Support"
+          newline
+          bitfld.long 0x00 2. "ECLIC,Global configuration for ECLIC support" "Not support,Support"
+          newline
+          bitfld.long 0x00 1. "ECC,Global configuration for ECC support" "Not support,Support"
+          newline
+          bitfld.long 0x00 0. "TEE,Global configuration for TEE support" "Not support,Support"
+if ((((per.l(CSR:0xFC3))>>26.)&0x1)==0.)
+  group.long (0xFC3*4)++3.
+      line.long 0x00 "MTLBCFG_INFO,TLB configuration information"
+          bitfld.long 0x00 27. "TLB_MAPPING,ITLB/DTLB Mapping method" "Old mapping,New mapping"
+          newline
+          bitfld.long 0x00 19.--21. "DTLB_SIZE,DTLB size" "No DTLB,,,,8 entry,16 entry,32 entry,64 entry"
+          newline
+          bitfld.long 0x00 16.--18. "ITLB_SIZE,ITLB size" "No ITLB,,,,8 entry,16 entry,32 entry,64 entry"
+          newline
+          bitfld.long 0x00 11. "MTLB_NAPOT,TLB supports Svnapot or not" "Not support,Support"
+          newline
+          bitfld.long 0x00 10. "MTLB_ECC,Main TLB supports ECC or not" "Not support,Support"
+          newline
+          bitfld.long 0x00 4.--6. "MTLB_WAY,Main TLB ways" "Direct-mapped,2-way,3-way,4-way,5-way,6-way,7-way,8-way"
+          newline
+          bitfld.long 0x00 0.--3. "MTLB_WAY_ENTRY,Main TLB Entry per way" "8,16,32,64,128,256,512,1024,2048,4096,8192,?..."
+else
+  group.long (0xFC3*4)++3.
+      line.long 0x00 "MTLBCFG_INFO,TLB configuration information"
+          bitfld.long 0x00 27. "TLB_MAPPING,ITLB/DTLB Mapping method" "Old mapping,New mapping"
+          newline
+          bitfld.long 0x00 19.--26. "DTLB_SIZE,DTLB size" "DTLB entry num - 1"
+          newline
+          bitfld.long 0x00 12.--18. "ITLB_SIZE,ITLB size" "DTLB entry num - 1"
+          newline
+          bitfld.long 0x00 11. "MTLB_NAPOT,TLB supports Svnapot or not" "Not support,Support"
+          newline
+          bitfld.long 0x00 10. "MTLB_ECC,Main TLB supports ECC or not" "Not support,Support"
+          newline
+          bitfld.long 0x00 4.--6. "MTLB_WAY,Main TLB ways" "Direct-mapped,2-way,3-way,4-way,5-way,6-way,7-way,8-way"
+          newline
+          bitfld.long 0x00 0.--3. "MTLB_WAY_ENTRY,Main TLB Entry per way" "8,16,32,64,128,256,512,1024,2048,4096,8192,?..."
+endif
+  group.long (0x170*4)++3.
+      line.long 0x00 "SMPUSWITCH0,Supervisor context switch register"
+  group.long (0x171*4)++3.
+      line.long 0x00 "SMPUSWITCH1,Supervisor context switch register"
+  group.long (0x1A0*4)++3.
+      line.long 0x00 "SMPUCFG0,Supervisor physical memory protection configuration"
+  group.long (0x1A1*4)++3.
+      line.long 0x00 "SMPUCFG1,Supervisor physical memory protection configuration"
+  group.long (0x1A2*4)++3.
+      line.long 0x00 "SMPUCFG2,Supervisor physical memory protection configuration"
+  group.long (0x1A3*4)++3.
+      line.long 0x00 "SMPUCFG3,Supervisor physical memory protection configuration"
+  group.long (0x1B0*4)++3.
+      line.long 0x00 "SMPUADDR0,Supervisor physical memory protection address register"
+  group.long (0x1B1*4)++3.
+      line.long 0x00 "SMPUADDR1,Supervisor physical memory protection address register"
+  group.long (0X1B2*4)++3.
+      line.long 0x00 "SMPUADDR2,Supervisor physical memory protection address register"
+  group.long (0X1B3*4)++3.
+      line.long 0x00 "SMPUADDR3,Supervisor physical memory protection address register"
+  group.long (0X1B4*4)++3.
+      line.long 0x00 "SMPUADDR4,Supervisor physical memory protection address register"
+  group.long (0X1B5*4)++3.
+      line.long 0x00 "SMPUADDR5,Supervisor physical memory protection address register"
+  group.long (0X1B6*4)++3.
+      line.long 0x00 "SMPUADDR6,Supervisor physical memory protection address register"
+  group.long (0X1B7*4)++3.
+      line.long 0x00 "SMPUADDR7,Supervisor physical memory protection address register"
+  group.long (0X1B8*4)++3.
+      line.long 0x00 "SMPUADDR8,Supervisor physical memory protection address register"
+  group.long (0X1B9*4)++3.
+      line.long 0x00 "SMPUADDR9,Supervisor physical memory protection address register"
+  group.long (0X1BA*4)++3.
+      line.long 0x00 "SMPUADDR10,Supervisor physical memory protection address register"
+  group.long (0X1BB*4)++3.
+      line.long 0x00 "SMPUADDR11,Supervisor physical memory protection address register"
+  group.long (0X1BC*4)++3.
+      line.long 0x00 "SMPUADDR12,Supervisor physical memory protection address register"
+  group.long (0X1BD*4)++3.
+      line.long 0x00 "SMPUADDR13,Supervisor physical memory protection address register"
+  group.long (0X1BE*4)++3.
+      line.long 0x00 "SMPUADDR14,Supervisor physical memory protection address register"
+  group.long (0X1BF*4)++3.
+      line.long 0x00 "SMPUADDR15,Supervisor physical memory protection address register"
+  group.long (0X1C0*4)++3.
+      line.long 0x00 "SMPUADDR16,Supervisor physical memory protection address register"
+  group.long (0X1C1*4)++3.
+      line.long 0x00 "SMPUADDR17,Supervisor physical memory protection address register"
+  group.long (0X1C2*4)++3.
+      line.long 0x00 "SMPUADDR18,Supervisor physical memory protection address register"
+  group.long (0X1C3*4)++3.
+      line.long 0x00 "SMPUADDR19,Supervisor physical memory protection address register"
+  group.long (0X1C4*4)++3.
+      line.long 0x00 "SMPUADDR20,Supervisor physical memory protection address register"
+  group.long (0X1C5*4)++3.
+      line.long 0x00 "SMPUADDR21,Supervisor physical memory protection address register"
+  group.long (0X1C6*4)++3.
+      line.long 0x00 "SMPUADDR22,Supervisor physical memory protection address register"
+  group.long (0X1C7*4)++3.
+      line.long 0x00 "SMPUADDR23,Supervisor physical memory protection address register"
+  group.long (0X1C8*4)++3.
+      line.long 0x00 "SMPUADDR24,Supervisor physical memory protection address register"
+  group.long (0X1C9*4)++3.
+      line.long 0x00 "SMPUADDR25,Supervisor physical memory protection address register"
+  group.long (0X1CA*4)++3.
+      line.long 0x00 "SMPUADDR26,Supervisor physical memory protection address register"
+  group.long (0X1CB*4)++3.
+      line.long 0x00 "SMPUADDR27,Supervisor physical memory protection address register"
+  group.long (0X1CC*4)++3.
+      line.long 0x00 "SMPUADDR28,Supervisor physical memory protection address register"
+  group.long (0X1CD*4)++3.
+      line.long 0x00 "SMPUADDR29,Supervisor physical memory protection address register"
+  group.long (0X1CE*4)++3.
+      line.long 0x00 "SMPUADDR30,Supervisor physical memory protection address register"
+  group.long (0X1CF*4)++3.
+      line.long 0x00 "SMPUADDR31,Supervisor physical memory protection address register"
+  group.long (0X1D0*4)++3.
+      line.long 0x00 "SMPUADDR32,Supervisor physical memory protection address register"
+  group.long (0X1D1*4)++3.
+      line.long 0x00 "SMPUADDR33,Supervisor physical memory protection address register"
+  group.long (0X1D2*4)++3.
+      line.long 0x00 "SMPUADDR34,Supervisor physical memory protection address register"
+  group.long (0X1D3*4)++3.
+      line.long 0x00 "SMPUADDR35,Supervisor physical memory protection address register"
+  group.long (0X1D4*4)++3.
+      line.long 0x00 "SMPUADDR36,Supervisor physical memory protection address register"
+  group.long (0X1D5*4)++3.
+      line.long 0x00 "SMPUADDR37,Supervisor physical memory protection address register"
+  group.long (0X1D6*4)++3.
+      line.long 0x00 "SMPUADDR38,Supervisor physical memory protection address register"
+  group.long (0X1D7*4)++3.
+      line.long 0x00 "SMPUADDR39,Supervisor physical memory protection address register"
+  group.long (0X1D8*4)++3.
+      line.long 0x00 "SMPUADDR40,Supervisor physical memory protection address register"
+  group.long (0X1D9*4)++3.
+      line.long 0x00 "SMPUADDR41,Supervisor physical memory protection address register"
+  group.long (0X1DA*4)++3.
+      line.long 0x00 "SMPUADDR42,Supervisor physical memory protection address register"
+  group.long (0X1DB*4)++3.
+      line.long 0x00 "SMPUADDR43,Supervisor physical memory protection address register"
+  group.long (0X1DC*4)++3.
+      line.long 0x00 "SMPUADDR44,Supervisor physical memory protection address register"
+  group.long (0X1DD*4)++3.
+      line.long 0x00 "SMPUADDR45,Supervisor physical memory protection address register"
+  group.long (0X1DE*4)++3.
+      line.long 0x00 "SMPUADDR46,Supervisor physical memory protection address register"
+  group.long (0X1DF*4)++3.
+      line.long 0x00 "SMPUADDR47,Supervisor physical memory protection address register"
+  group.long (0X1E0*4)++3.
+      line.long 0x00 "SMPUADDR48,Supervisor physical memory protection address register"
+  group.long (0X1E1*4)++3.
+      line.long 0x00 "SMPUADDR49,Supervisor physical memory protection address register"
+  group.long (0X1E2*4)++3.
+      line.long 0x00 "SMPUADDR50,Supervisor physical memory protection address register"
+  group.long (0X1E3*4)++3.
+      line.long 0x00 "SMPUADDR51,Supervisor physical memory protection address register"
+  group.long (0X1E4*4)++3.
+      line.long 0x00 "SMPUADDR52,Supervisor physical memory protection address register"
+  group.long (0X1E5*4)++3.
+      line.long 0x00 "SMPUADDR53,Supervisor physical memory protection address register"
+  group.long (0X1E6*4)++3.
+      line.long 0x00 "SMPUADDR54,Supervisor physical memory protection address register"
+  group.long (0X1E7*4)++3.
+      line.long 0x00 "SMPUADDR55,Supervisor physical memory protection address register"
+  group.long (0X1E8*4)++3.
+      line.long 0x00 "SMPUADDR56,Supervisor physical memory protection address register"
+  group.long (0X1E9*4)++3.
+      line.long 0x00 "SMPUADDR57,Supervisor physical memory protection address register"
+  group.long (0X1EA*4)++3.
+      line.long 0x00 "SMPUADDR58,Supervisor physical memory protection address register"
+  group.long (0X1EB*4)++3.
+      line.long 0x00 "SMPUADDR59,Supervisor physical memory protection address register"
+  group.long (0X1EC*4)++3.
+      line.long 0x00 "SMPUADDR60,Supervisor physical memory protection address register"
+  group.long (0X1ED*4)++3.
+      line.long 0x00 "SMPUADDR61,Supervisor physical memory protection address register"
+  group.long (0X1EE*4)++3.
+      line.long 0x00 "SMPUADDR62,Supervisor physical memory protection address register"
+  group.long (0X1EF*4)++3.
+      line.long 0x00 "SMPUADDR63,Supervisor physical memory protection address register"
+  group.long (0x107*4)++3.
+      line.long 0x00 "STVT,Supervisor Trap-handler vector table base address"
+  group.long (0x146*4)++3.
+      line.long 0x00 "SINTSTATUS,Supervisor current interrupt level"
+  group.long (0x148*4)++3.
+      line.long 0x00 "SSCRATCHCSW,Scratch swap register for multiple privilege modes"
+  group.long (0x947*4)++3.
+      line.long 0x00 "JALSNXTI,Jumping to next supervisor interrupt handler address and interrupt-enable register"
+  group.long (0x948*4)++3.
+      line.long 0x00 "STVT2,ECLIC non-vectored supervisor interrupt handler address register"
+  group.long (0x949*4)++3.
+      line.long 0x00 "PUSHSCAUSE,Push scause to stack"
+  group.long (0x94a*4)++3.
+      line.long 0x00 "PUSHSEPC,Push sepc to stack"
+  group.long (0x9C0*4)++3.
+      line.long 0x00 "SDCAUSE,Detail information for scause"
+  group.long (0x7CB*4)++3.
+      line.long 0x00 "CCM_MBEGINADDR,Machine Mode CCM operation ADDR"
+  group.long (0x7CC*4)++3.
+      line.long 0x00 "CCM_MCOMMAND,Machine Mode CCM operation CMD"
+  group.long (0x7CD*4)++3.
+      line.long 0x00 "CCM_MDATA,Machine Mode CCM operation ReadBack DATA"
+  group.long (0x7CE*4)++3.
+      line.long 0x00 "CCM_SUEN,Supervisor/User mode CCM Control"
+  group.long (0x5CB*4)++3.
+      line.long 0x00 "CCM_SBEGINADDR,Supervisor Mode CCM operation ADDR"
+  group.long (0x5CC*4)++3.
+      line.long 0x00 "CCM_SCOMMAND,Supervisor Mode CCM operation CMD"
+  group.long (0x5CD*4)++3.
+      line.long 0x00 "CCM_SDATA,Supervisor Mode CCM operation ReadBack DATA"
+  group.long (0x4CB*4)++3.
+      line.long 0x00 "CCM_UBEGINADDR,User Mode CCM operation ADDR"
+  group.long (0x4CC*4)++3.
+      line.long 0x00 "CCM_UCOMMAND,User Mode CCM operation CMD"
+  group.long (0x4CD*4)++3.
+      line.long 0x00 "CCM_UDATA,User Mode CCM operation ReadBack DATA"
+  group.long (0x4CF*4)++3.
+      line.long 0x00 "CCM_FPIPE,Flush Pipeline CMD"
+  group.long (0x813*4)++3.
+      line.long 0x00 "STL_RF_CRC,Controlling CRC enable and clear CRC"
+tree.end
+AUTOINDENT.OFF
+ENDIF
+SIF (CPUIS64BIT())
+AUTOINDENT.ON CENTER TREE
+tree "Customized CSRs in the Nuclei processor core"
+  group.quad (0x307*8)++7.
+      line.quad 0x00 "MTVT,ECLIC Interrupt Vector Table Base Address"
+  group.quad (0x346*8)++7.
+      line.quad 0x00 "MINTSTATUS,Current Interrupt Level. mintstatus register"
+          bitfld.quad 0x00 24.--31. "MIL,The active interrupt level in machine mode"
+          newline
+          bitfld.quad 0x00 0.--7. "UIL,The active interrupt level in user mode"
+  group.quad (0x348*8)++7.
+      line.quad 0x00 "MSCRATCHCSW,Scratch swap register for privileged mode"
+  group.quad (0x349*8)++7.
+      line.quad 0x00 "MSCRATCHCSWL,Scratch swap register for privileged mode"
+  group.quad (0x390*8)++7.
+      line.quad 0x00 "MLWID,WorldGuard for security"
+  group.quad (0x5F0*8)++7.
+      line.quad 0x00 "SATTRI0_BASE,Base address of Secure Region 0 to set attribute"
+          bitfld.quad 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0x5F1*8)++7.
+      line.quad 0x00 "SATTRI0_MASK,Mask(size) of Secure Region 0 to set attribute"
+  group.quad (0x5F2*8)++7.
+      line.quad 0x00 "SATTRI1_BASE,Base address of Secure Region 1 to set attribute"
+          bitfld.quad 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0x5F3*8)++7.
+      line.quad 0x00 "SATTRI1_MASK,Mask(size) of Secure Region 1 to set attribute"
+  group.quad (0x5F4*8)++7.
+      line.quad 0x00 "SATTRI2_BASE,Base address of Secure Region 2 to set attribute"
+          bitfld.quad 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0x5F5*8)++7.
+      line.quad 0x00 "SATTRI2_MASK,Mask(size) of Secure Region 2 to set attribute"
+  group.quad (0x5F6*8)++7.
+      line.quad 0x00 "SATTRI3_BASE,Base address of Secure Region 3 to set attribute"
+          bitfld.quad 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0x5F7*8)++7.
+      line.quad 0x00 "SATTRI3_MASK,Mask(size) of Secure Region 3 to set attribute"
+  group.quad (0x5F8*8)++7.
+      line.quad 0x00 "SATTRI4_BASE,Base address of Secure Region 4 to set attribute"
+          bitfld.quad 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0x5F9*8)++7.
+      line.quad 0x00 "SATTRI4_MASK,Mask(size) of Secure Region 4 to set attribute"
+  group.quad (0x5FA*8)++7.
+      line.quad 0x00 "SATTRI5_BASE,Base address of Secure Region 5 to set attribute"
+          bitfld.quad 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0x5FB*8)++7.
+      line.quad 0x00 "SATTRI5_MASK,Mask(size) of Secure Region 5 to set attribute"
+  group.quad (0x5FC*8)++7.
+      line.quad 0x00 "SATTRI6_BASE,Base address of Secure Region 6 to set attribute"
+          bitfld.quad 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0x5FD*8)++7.
+      line.quad 0x00 "SATTRI6_MASK,Mask(size) of Secure Region 6 to set attribute"
+  group.quad (0x5FE*8)++7.
+      line.quad 0x00 "SATTRI7_BASE,Base address of Secure Region 7 to set attribute"
+          bitfld.quad 0x00 0. "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0x5FF*8)++7.
+      line.quad 0x00 "SATTRI7_MASK,Mask(size) of Secure Region 7 to set attribute"
+  group.quad (0x7C0*8)++7.
+      line.quad 0x00 "MILM_CTL,Enable/Disabled the ILM address space. milm_ctl register"
+          bitfld.quad 0x00 10.--31. "ILM_BPA,The base physical address of ILM"
+          newline
+          bitfld.quad 0x00 6. "DIS_LSU_ILM,Disabled LSU access ILM" "Enabled,Disabled"
+          newline
+          bitfld.quad 0x00 5. "ILM_VA_EN,Use virtual address for ILM access" "Not use,Use"
+          newline
+          bitfld.quad 0x00 4. "ILM_ECC_CHK_EN,Controls to check the ECC Code or not when core access to ILM." "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 3. "ILM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to ILM" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 2. "ILM_ECC_EXCP_EN,ILM double bit ECC exception enable control" "No exception,Exception"
+          newline
+          bitfld.quad 0x00 1. "ILM_ECC_EN,ILM ECC feature enable control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 0. "ILM_ENABLE,Instruction Local Memory enable bit" "Disabled,Enabled"
+  group.quad (0x7C1*8)++7.
+      line.quad 0x00 "MDLM_CTL,Enable/Disabled the DLM address space. mdlm_ctl register"
+          bitfld.quad 0x00 10.--31. "DLM_BPA,The base physical address of DLM"
+          newline
+          bitfld.quad 0x00 5. "DIS_LSU_DLM,Disabled LSU access DLM" "Enabled,Disabled"
+          newline
+          bitfld.quad 0x00 4. "DLM_ECC_CHK_EN,Controls to check the ECC Code or not when core access to DLM" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 3. "DLM_ECC_INJ_EN,Controls to inject the ECC Code in CSRmecc_code to DLM" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 2. "DLM_ECC_EXCP_EN,DLM double bit ECC exception enable control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 1. "DLM_ECC_EN,DLM ECC enable feature control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 0. "DLM_ENABLE,Data Local Memory enable bit" "Disabled,Enabled"
+  group.quad (0x7C2*8)++7.
+      line.quad 0x00 "MECC_CODE,ECC code injection register, can be used to simulate ECC error.mecc_code register"
+          bitfld.quad 0x00 24.--28. "SRAMID,The ID of RAM that has single bit ECC errors" "I-Cache,D-Cache,Main TLB,ILM,DLM"
+          newline
+          bitfld.quad 0x00 16.--20. "RAMID,The ID of RAM that has double bit ECC errors" "I-Cache,D-Cache,Main TLB,ILM,DLM"
+          newline
+          bitfld.quad 0x00 9.--15.  "RSVD,Reserved"  "0"
+          newline
+          bitfld.quad 0x00 0.--8.   "CODE,ECC code for injection"
+  group.quad (0x7C3*8)++7.
+      line.quad 0x00 "MNVEC,Customized register used to indicate the NMI handler entry address"
+  group.quad (0x7C4*8)++7.
+      line.quad 0x00 "MSUBM,Customized register storing current trap type and the previous.msubm register trap type before trapped"
+          bitfld.quad 0x00 8.--9. "PTYP,Machine sub-mode before entering the trap" "Normal Machine Mode,Interrupt Handling Mode,Exception Handling Mode,NMI Handling Mode"
+          newline
+          bitfld.quad 0x00 6.--7. "TYP,Current sub-mode" "Normal Machine Mode,Interrupt Handling Mode,Exception Handling Mode,NMI Handling Mode"
+  group.quad (0x7C6*8)++7.
+      line.quad 0x00 "MSTACK_CTL,Customized register to control Stack Check function.mstack_ctl register"
+          bitfld.quad 0x00 2. "MODE,Mode of stack checking" "Overflow and Underflow check,Track the stack top"
+          newline
+          bitfld.quad 0x00 1. "UDF_EN,Stack underflow check enable" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 0. "OVF_TRACK_EN,Stack overflow check or track enable" "Disabled,Enabled"
+  group.quad (0x7C7*8)++7.
+      line.quad 0x00 "MSTACK_BOUND,Customized register to store the bound of or track stack top for Stack Check. mstack_bound register"
+          bitfld.quad 0x00 0.--31. "BOUND,Stack top’s value for stack overflow check or track (Default value is all ones)"
+  group.quad (0x7C8*8)++7.
+      line.quad 0x00 "MSTACK_BASE,Customized register to store the stack base for Stack Check. mstack_base register"
+          bitfld.quad 0x00 0.--31. "BASE,Stack base’s value for stack underflow check (Default value is all ones)"
+  group.quad (0x7C9*8)++7.
+      line.quad 0x00 "MDCAUSE,Customized register storing current trap’s detailed cause. mdcause register"
+          if (((per.q(CSR:0x342))&0xFFF)==1.)
+            group.quad (0x7C9*8)++7.
+                bitfld.quad 0x00 0.--2. "MDCAUSE,Instruction access fault detail" ",PMP  permission violation,Bus error,,,,,ECC error"
+          elif (((per.q(CSR:0x342))&0xFFF)==5.)
+            group.quad (0x7C9*8)++7.
+                bitfld.quad 0x00 0.--2. "MDCAUSE,Load access fault detail" ",PMP permission violation bus error,Bus error caused by core memory read,Bus error caused by NICE write back,,,,ECC error"
+          elif (((per.q(CSR:0x342))&0xFFF)==7.)
+            group.quad (0x7C9*8)++7.
+                bitfld.quad 0x00 0.--2. "MDCAUSE,Store/AMO access fault detail" ",PMP permission violation bus error,Bus error caused by core memory write,,,,,ECC error"
+          elif (((per.q(CSR:0x342))&0xFFF)==12.)
+            group.quad (0x7C9*8)++7.
+                bitfld.quad 0x00 0.--2. "MDCAUSE,Instruction page fault detail" ",,,,,MMU fault,SMPU fault,ECC error"
+          elif (((per.q(CSR:0x342))&0xFFF)==13.)
+            group.quad (0x7C9*8)++7.
+                bitfld.quad 0x00 0.--2. "MDCAUSE,Load page fault detail" ",,,,,MMU fault,Load page fault bus error caused by SMPU,ECC error"
+          elif (((per.q(CSR:0x342))&0xFFF)==15.)
+            group.quad (0x7C9*8)++7.
+                bitfld.quad 0x00 0.--2. "MDCAUSE,Store page fault detail" ",,,,,MMU fault,Store page fault bus error caused by SMPU,ECC error"
+          endif
+  group.quad (0x7CA*8)++7.
+      line.quad 0x00 "MCACHE_CTL,Customized register to control the Cache features"
+          bitfld.quad 0x00 23. "DC_BURST_TYPE,D-Cache Burst type control" "WRAP,INCR"
+          newline
+          bitfld.quad 0x00 22. "DC_PREFETCH_EN,D-Cache CMO prefetch enable control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 21. "DC_ECC_CHK_EN,Controls to check the ECC Code when core access to D-Cache" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 20. "DC_DRAM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to D-Cache data rams" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 19. "DC_TRAM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to D-Cache tag rams" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 18. "DC_ECC_EXCP_EN,D-Cache double bit ECC exception enable control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 17. "DC_ECC_EN,D-Cache ECC enable control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 16. "DC_EN,D-Cache enable control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 10. "IC_BURST_TYPE,I-Cache Burst type control" "WRAP,INCR"
+          newline
+          bitfld.quad 0x00 9. "IC_PREFETCH_EN,I-Cache CMO prefetch enable control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 8. "IC_ECC_CHK_EN,Controls to check the ECC when core access to I-Cache" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 7. "IC_CANCEL_EN,I-Cache change flow canceling enable control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 6. "IC_PF_EN,I-Cache prefetch enable control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 5. "IC_DRAM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to I-Cache data rams" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 4. "IC_TRAM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to I-Cache tag rams" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 3. "IC_ECC_EXCP_EN,I-Cache double bit ECC exception enable control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 2. "IC_ECC_EN,I-Cache ECC enable control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 1. "IC_SCPD_MOD,I-Cache Scratchpad Mode enable control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 0. "IC_EN,I-Cache enable control" "Disabled,Enabled"
+  group.quad (0x7D0*8)++7.
+      line.quad 0x00 "MMISC_CTL,Customized register controlling the selection of the NMI Handler"
+          bitfld.quad 0x00 17. "CSR_EXCL_ENABLE,Exclusive instruction(lr,sc) on Non-cacheable/Device memory can send exclusive flag in memory bus" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 12. "LDSPEC_ENABLE,Enable or disable the Load Speculative goes to Mem Interface" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 11. "SIUMP_ENABLE,Control the SIUMP mode of trace if Encoder inside Core" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 10. "IMRETURN_ENABLE,Control the IMRETURN mode of trace if Encoder inside Core" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 9. "NMI_CAUSE_FFF,Control mvec and mcause.EXCODE of NMI" "mnvec = PC address && mcause.EXCCODE of NMI is 0x1,mnvec = mtvec && mcause.EXCCODE of NMI is 0xfff"
+          newline
+          bitfld.quad 0x00 8. "CORE_BUS_ERR,Control the bus error caused by core is exception or interrupt" "Exception,Interrupt"
+          newline
+          bitfld.quad 0x00 7. "ZCMT_ZCMP_EN,Control the ZCMP and ZCMT Ext uses the Zcd extension encoding or not" "Zcd encoding,ZCMP and ZCMT encoding"
+          newline
+          bitfld.quad 0x00 6. "UNAGING_ENABLE,Enable or disable misaligned load/store access" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 3. "BPU_ENABLE,Enable or disable the BPU Unit" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 1. "ZCLSD_EN,Control the Zclsd will uses the Zcf extension encoding or not" "Zcf,Zclsd"
+  group.quad (0x7DD*8)++7.
+      line.quad 0x00 "MTLB_CTL,Customized register to control the TLB"
+          bitfld.quad 0x00 7 "NAPOT_EN,Napot page enable" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 6 "TLB_ECC_CHK_EN,Controls to check the ECC when core access to MTLB" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 3 "TLB_DRAM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to MTLB data rams" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 2 "TLB_TRAM_ECC_INJ_EN,Controls to inject the ECC Code in CSR mecc_code to MTLB tag rams" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 1 "TLB_ECC_EXCP_EN,MTLB double bit ECC exception enable control" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 0 "TLB_ECC_EN,MTLB ECC enable control" "Disabled,Enabled"
+  group.quad (0x7DE*8)++7.
+      line.quad 0x00 "MECC_LOCK,To lock ECC configure registers,then all the ECC related CSRs cannot"
+          bitfld.quad 0x00 0. "ECC_LOCK,To lock ECC related CSRs" "Not locked,locked"
+  group.quad (0x7E2*8)++7.
+      line.quad 0x00 "MMISC_CTL1,Customized register used to set 16 bit float precision mode"
+          bitfld.quad 0x00 6. "RVV_VL_0_CMPT,Control some vpu instruction behaviour is compatible with rvv1.0" "Not compatible,Compatible"
+          newline
+          bitfld.quad 0x00 5. "VLM_PATH_EN,Control vlm dedicated path enable" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 4. "VLSU_COF_EN,Control the enable of vlsu check-only first feature" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 3. "VLSU_OOO_EN,Control the enable of vlsu ooo feature" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 2. "VLSU_OOO_FORCE_VA_4K,Control the size of virtual address check region for vlsu ooo" "By vlsu_ooo_4k_mode,Force 4KB"
+          newline
+          bitfld.quad 0x00 1. "VLSU_OOO_4K_MODE,Control the size of address check region for vlsu ooo" "1MB,4KB"
+          newline
+          bitfld.quad 0x00 0. "FP16MODE,16 bit float precision mode" "Normal mode,Bfloat16"
+  group.quad (0x7EB*8)++7.
+      line.quad 0x00 "PUSHMSUBM,Customized register used to push the value of msubm into the stack memory"
+  group.quad (0x7EC*8)++7.
+      line.quad 0x00 "MTVT2,Customized register used to indicate the common handler entry address of non-vectored interrupts"
+          bitfld.quad 0x00 2.--31. "COMMON-CODE-ENTRY,When mtvt2.MTVT2EN=1 this field determines the entry address of interrupt common code in ECLIC non-vector mode"
+          newline
+          bitfld.quad 0x00 0. "MTVT2EN,mtvt2 enable" "The entry addressDetermined by mtvec,The entry address determined by mtvt2.COMMON-CODE-ENTRY"
+  group.quad (0x7ED*8)++7.
+      line.quad 0x00 "JALMNXTI,Customized register used to enable the ECLIC interrupt.The read operation of this register will take the next interrupt,return the entry address of next interrupt handler,and jump to the corresponding handler at the same time"
+  group.quad (0x7EE*8)++7.
+      line.quad 0x00 "PUSHMCAUSE,Customized register used to push the value of mcause into the stack memory"
+  group.quad (0x7EF*8)++7.
+      line.quad 0x00 "PUSHMEPC,Customized register used to push the value of mepc into the stack memory"
+  group.quad (0x7f0*8)++7.
+      line.quad 0x00 "MPPICFG_INFO,PPI Configuration Information"
+          bitfld.quad 0x00 10.--31. "PPI_BPA,The base physical address of PPI and has to be aligned to multiple of PPI size"
+          newline
+          bitfld.quad 0x00 9. "PPI_EN,PPI Enable" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 1.--5. "PPI_SIZE,Indicates the size of PPI and it should be power of 2" ",1KB,2KB,4KB,8KB,16KB,32KB,64KB,128KB,256KB,512KB,1MB,2MB,4MB,8MB,16MB,32MB,64MB,128MB,256MB,512MB,1GB,2GB,?..."
+          newline
+          bitfld.quad 0x00 0. "RSVD,Reserved" "1"
+  group.quad (0x7F1*8)++7.
+      line.quad 0x00 "MFIOCFG_INFO,FIO Configuration Information"
+          bitfld.quad 0x00 10.--31. "FIO_BPA,The base physical address of FIO and has to be aligned to multiple of FIO size"
+          newline
+          bitfld.quad 0x00 1.--5. "FIO_SIZE,Indicates the size of FIO and it should be power of 2" ",1KB,2KB,4KB,8KB,16KB,32KB,64KB,128KB,256KB,512KB,1MB,2MB,4MB,8MB,16MB,32MB,64MB,128MB,256MB,512MB,1GB,2GB,?..."
+          newline
+          bitfld.quad 0x00 0. "RSVD,Reserved" "1"
+  group.quad (0x7F3*8)++7.
+      line.quad 0x00 "MATTRI0_BASE,Base address of Region 0 to set attribute"
+          bitfld.quad 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.quad 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.quad 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.quad 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0x7F4*8)++7.
+      line.quad 0x00 "MATTRI0_MASK,Mask(size) of Region 0 to set attribute"
+  group.quad (0x7F5*8)++7.
+      line.quad 0x00 "MATTRI1_BASE,Base address of Region 1 to set attribute"
+          bitfld.quad 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.quad 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.quad 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.quad 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0x7F6*8)++7.
+      line.quad 0x00 "MATTRI1_MASK,Mask(size) of Region 1 to set attribute"
+  group.quad (0x7F9*8)++7.
+      line.quad 0x00 "MATTRI2_BASE,Base address of Region 2 to set attribute"
+          bitfld.quad 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.quad 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.quad 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.quad 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0x7FA*8)++7.
+      line.quad 0x00 "MATTRI2_MASK,Mask(size) of Region 2 to set attribute"
+  group.quad (0x7fb*8)++7.
+      line.quad 0x00 "MATTRI3_BASE,Base address of Region 3 to set attribute"
+          bitfld.quad 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.quad 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.quad 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.quad 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0x7FC*8)++7.
+      line.quad 0x00 "MATTRI3_MASK,Mask(size) of Region 3 to set attribute"
+  group.quad (0x7FD*8)++7.
+      line.quad 0x00 "MATTRI4_BASE,Base address of Region 4 to set attribute"
+          bitfld.quad 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.quad 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.quad 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.quad 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0x7FE*8)++7.
+      line.quad 0x00 "MATTRI4_MASK,Mask(size) of Region 4 to set attribute"
+  group.quad (0x7f7*8)++7.
+      line.quad 0x00 "MIRGB_INFO,IREGION Configuration Information"
+          bitfld.quad 0x00 1.--5. "IREGION_SIZE,Indicates the size of IREGION and it should be power of 2" ",1KB,2KB,4KB,8KB,16KB,32KB,64KB,128KB,256KB,512KB,1MB,2MB,4MB,8MB,16MB,32MB,64MB,128MB,256MB,512MB,1GB,2GB,?..."
+          newline
+          bitfld.quad 0x00 0. "RSVD,Reserved" "1"
+  group.quad (0x810*8)++7.
+      line.quad 0x00 "WFE,Customized register used to control the WFE mode"
+          bitfld.quad 0x00 1. "IRQ_WAKEUP_WFE_EN,Control whether the processor should be awakened by interrupt or event" "Not can,Can"
+          newline
+          bitfld.quad 0x00 0. "WFE,Control whether the processor should be awakened by interrupt or event" "By interrupt and NMI in sleep mode,By event and NMI in sleep mode"
+  group.quad (0x811*8)++7.
+      line.quad 0x00 "SLEEPVALUE,Customized register used to indicate the WFI sleep mode"
+          bitfld.quad 0x00 0. "SLEEPVALUE,Control WFI sleep mode" "Shallow sleep mode,Deep sleep mode"
+  group.quad (0x812*8)++7.
+      line.quad 0x00 "TXEVT,Customized register used to send an event"
+          bitfld.quad 0x00 0. "TXEVT,Event control" "No action,The core will trigger a single-cycle pulse output signal tx_evt as event signal"
+  group.quad (0x801*8)++7.
+      line.quad 0x00 "UCODE,Overflow flag of the P extension"
+          bitfld.quad 0x00 0. "OV,Record if there is overflow happened in DSP instructions" "Not overflow,Overflow"
+  group.quad (0xBC0*8)++7.
+      line.quad 0x00 "MECC_CTL,ECC Control Register"
+          bitfld.quad 0x00 31. "IO_PROT_CHK_EN,Controls to check the IO interface" "Not check,Check"
+          newline
+          bitfld.quad 0x00 9. "DC_CPBK_MSK,Write 1 to disable aggregate DCache CPBK ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 8. "DC_CCM_MSK,Write 1 to disable aggregate DCache CCM ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 7. "IC_CCM_MSK,Write 1 to disable aggregate ICache CCM ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 6. "DLM_EXT_MSK,Write 1 to disable aggregate DLM external access ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 5. "ILM_EXT_MSK,Write 1 to disable aggregate ILM external access ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 4. "DC_ACC_MSK,Write 1 to disable aggregate DCache access ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 3. "IC_FCH_MSK,Write 1 to disable aggregate ICache fetch ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 2. "DLM_ACC_MSK,Write 1 to disable aggregate DLM access ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 1. "ILM_ACC_MSK,Write 1 to disable aggregate ILM load/store access ECC fatal error to safety_error output" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 0. "ILM_FCH_MSK,Write 1 to disable aggregate ILM fetch ECC fatal error to safety_error output" "Disabled,Enabled"
+  group.quad (0xBC4*8)++7.
+      line.quad 0x00 "MECC_STATUS,ECC Status and Control Register"
+          bitfld.quad 0x00 9. "DC_CPBK_ERR,DCache CPBK ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.quad 0x00 8. "DC_CCM_ERR,DCache CCM ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.quad 0x00 7. "IC_CCM_ERR,ICache CCM ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.quad 0x00 6. "DLM_EXT_ERR,DLM external access ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.quad 0x00 5. "ILM_EXT_ERR,ILM external access ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.quad 0x00 4. "DC_ACC_ERR,DCache access ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.quad 0x00 3. "IC_FCH_ERR,ICache fetch ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.quad 0x00 2. "DLM_ACC_ERR,DLM access ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.quad 0x00 1. "ILM_ACC_ERR,ILM load/store access ECC fatal error has occurred" "No error,Error"
+          newline
+          bitfld.quad 0x00 0. "ILM_FCH_ERR,ILM fetch ECC fatal error has occurred" "No error,Error"
+  group.quad (0xBC8*8)++7.
+      line.quad 0x00 "MMACRO_DEV_EN,Enable Bit for Dev Region setting in RTL Configuration Stage"
+          bitfld.quad 0x00 7 "entry7_en,Controls to enable for Dev Region entry7" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 6 "entry6_en,Controls to enable for Dev Region entry6" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 5 "entry5_en,Controls to enable for Dev Region entry5" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 4 "entry4_en,Controls to enable for Dev Region entry4" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 3 "entry3_en,Controls to enable for Dev Region entry3" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 2 "entry2_en,Controls to enable for Dev Region entry2" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 1 "entry1_en,Controls to enable for Dev Region entry1" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 0 "entry0_en,Controls to enable for Dev Region entry0" "Disabled,Enabled"
+  group.quad (0xBC9*8)++7.
+      line.quad 0x00 "MMACRO_NOC_EN,Enable Bit for Non-Cacheable Region setting in RTL Configuration Stage"
+          bitfld.quad 0x00 7 "entry7_en,Controls to enable for Non-Cacheable Region entry7" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 6 "entry6_en,Controls to enable for Non-Cacheable Region entry6" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 5 "entry5_en,Controls to enable for Non-Cacheable Region entry5" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 4 "entry4_en,Controls to enable for Non-Cacheable Region entry4" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 3 "entry3_en,Controls to enable for Non-Cacheable Region entry3" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 2 "entry2_en,Controls to enable for Non-Cacheable Region entry2" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 1 "entry1_en,Controls to enable for Non-Cacheable Region entry1" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 0 "entry0_en,Controls to enable for Non-Cacheable Region entry0" "Disabled,Enabled"
+  group.quad (0xBCA*8)++7.
+      line.quad 0x00 "MMACRO_CA_EN,Enable Bit for Cacheable Region setting in RTL Configuration Stage"
+          bitfld.quad 0x00 7 "entry7_en,Controls to enable for Cacheable Region entry7" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 6 "entry6_en,Controls to enable for Cacheable Region entry6" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 5 "entry5_en,Controls to enable for Cacheable Region entry5" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 4 "entry4_en,Controls to enable for Cacheable Region entry4" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 3 "entry3_en,Controls to enable for Cacheable Region entry3" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 2 "entry2_en,Controls to enable for Cacheable Region entry2" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 1 "entry1_en,Controls to enable for Cacheable Region entry1" "Disabled,Enabled"
+          newline
+          bitfld.quad 0x00 0 "entry0_en,Controls to enable for Cacheable Region entry0" "Disabled,Enabled"
+  group.quad (0xBE0*8)++7.
+      line.quad 0x00 "MATTRI5_BASE,Base address of Region 5 to set attribute"
+          bitfld.quad 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.quad 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.quad 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.quad 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0xBE1*8)++7.
+      line.quad 0x00 "MATTRI5_MASK,Mask(size) of Region 5 to set attribute"
+  group.quad (0xBE2*8)++7.
+      line.quad 0x00 "MATTRI6_BASE,Base address of Region 6 to set attribute"
+          bitfld.quad 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.quad 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.quad 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.quad 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0xBE3*8)++7.
+      line.quad 0x00 "MATTRI6_MASK,Mask(size) of Region 6 to set attribute"
+  group.quad (0xBE4*8)++7.
+      line.quad 0x00 "MATTRI7_BASE,Base address of Region 7 to set attribute"
+          bitfld.quad 0x00 3 "SecShare,This region is shareable between secure world and non-secure world or not" "Invalid,Shareable"
+          newline
+          bitfld.quad 0x00 2 "NOC,This region is Non cacheable Region or not" "Invalid,Non cacheable"
+          newline
+          bitfld.quad 0x00 1 "DEV,This region is Device Region or not" "Invalid,Device"
+          newline
+          bitfld.quad 0x00 0 "ENA,Region enable control" "Disabled,Enabled"
+  group.quad (0xBE5*8)++7.
+      line.quad 0x00 "MATTRI7_MASK,Mask(size) of Region 7 to set attribute"
+  group.quad (0xDC0*8)++7.
+      line.quad 0x00 "SHARTID,HARTID for S-Mode."
+  group.quad (0xFC0*8)++7.
+      line.quad 0x00 "MICFG_INFO,ILM and I-Cache configuration information"
+          bitfld.quad 0x00 22. "ILM_ECC,ECC support for the instruction local memory (ILM)" "Not Support,Support"
+          newline
+          bitfld.quad 0x00 16.--20. "ILM_SIZE,Indicates the size of ILM and the size should be power of 2" "0B,256B,512B,1KB,2KB,4KB,8KB,16KB,32KB,64KB,128KB,256KB,512KB,1MB,2MB,4MB,8MB,16MB,32MB,64MB,128MB,256MB,512MB,?..."
+          newline
+          bitfld.quad 0x00 10. "IC_ECC,ECC support for the I-Cache" "Not Support,Support"
+          newline
+          bitfld.quad 0x00 7.--9. "IC_LSIZE,I-Cache line size" "No I-Cache,8B,16B,32B,64B,128B,?..."
+          newline
+          bitfld.quad 0x00 4.--6. "IC_WAY,I-Cache ways" "Direct-mapped,2-way,3-way,4-way,5-way,6-way,7-way,8-way"
+          newline
+          bitfld.quad 0x00 0.--3. "IC_SET,I-Cache sets per way" "8,16,32,64,128,256,512,1024,2048,4096,8192,?..."
+  group.quad (0xFC1*8)++7.
+      line.quad 0x00 "MDCFG_INFO,DLM and D-Cache configuration information"
+          bitfld.quad 0x00 21. "DLM_ECC,ECC support for the data local memory (DLM)" "Not Support,Support"
+          newline
+          bitfld.quad 0x00 16.--20. "DLM_SIZE,Indicates the size of DLM and the size should be power of 2" "0B,256B,512B,1KB,2KB,4KB,8KB,16KB,32KB,64KB,128KB,256KB,512KB,1MB,2MB,4MB,8MB,16MB,32MB,64MB,128MB,256MB,512MB,?..."
+          newline
+          bitfld.quad 0x00 10. "DC_ECC,ECC support for the D-Cache" "Not Support,Support"
+          newline
+          bitfld.quad 0x00 7.--9. "DC_LSIZE,D-Cache line size" "No D-Cache,8B,16B,32B,64B,128B,?..."
+          newline
+          bitfld.quad 0x00 4.--6. "DC_WAY,D-Cache ways" "Direct-mapped,2-way,3-way,4-way,5-way,6-way,7-way,8-way"
+          newline
+          bitfld.quad 0x00 0.--3. "DC_SET,D-Cache sets per way" "8,16,32,64,128,256,512,1024,2048,4096,8192,?..."
+  group.quad (0xFC2*8)++7.
+      line.quad 0x00 "MCFG_INFO,Processor configuration information"
+          bitfld.quad 0x00 26. "SSTC,Indicate Core supports SSTC RISC-V extension or not" "Not Support,Support"
+          newline
+          bitfld.quad 0x00 25. "ZILSD,Indicate Core supports ZILSD/ZCLSD RISC-V extension or not" "Not Support,Support"
+          newline
+          bitfld.quad 0x00 24. "XLCZ,Indicate Core supports XLCZ or not" "Support,Not support"
+          newline
+          bitfld.quad 0x00 23. "VNICE,Indicate Core supports VNICE or not" "Not support,Support"
+          newline
+          bitfld.quad 0x00 21.--22. "SAFETY_MECHANISM,Indicate Core's safety mechanism" "No Safety,Lockstep,Lockstep + Split,ASIL-B"
+          newline
+          bitfld.quad 0x00 20. "ETRACE,Indicate Core supports Etrace or not" "Not support,Support"
+          newline
+          bitfld.quad 0x00 19. "SEC_MODE,Indicate Core supports Smwg Extension or not" "Not support,Support"
+          newline
+          bitfld.quad 0x00 17.--18. "VPU_DEGREE,Indicate the VPU degree of parallel" "DLEN=VLEN/2,DLEN=VLEN,?..."
+          newline
+          bitfld.quad 0x00 16. "IREGION_EXIST,Shows the IREGION exist or not" "Not exist,Exists"
+          newline
+          bitfld.quad 0x00 15. "ZC_XLCZ_EXT,Indicate Core supports Zc and Xlcz Extension or not" "Not support,Support"
+          newline
+          bitfld.quad 0x00 14. "DSP_N3,Global configuration for DSP N3 Extension Support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 13. "DSP_N2,Global configuration for DSP N2 Extension Support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 12. "DSP_N1,Global configuration for DSP N1 Extension Support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 11. "SMP,Global configuration for SMP support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 10. "DCACHE,Global configuration for D-Cache support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 9.  "ICACHE,Global configuration for I-Cache support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 8. "DLM,Global configuration for DLM support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 7. "ILM,Global configuration for ILM support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 6. "NICE,Global configuration for NICE support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 5. "PPI,Global configuration for PPI support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 4. "FIO,Global configuration for FIO support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 3. "PLIC,Global configuration for PLIC support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 2. "ECLIC,Global configuration for ECLIC support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 1. "ECC,Global configuration for ECC support" "Not support,Support"
+          newline
+          bitfld.quad 0x00 0. "TEE,Global configuration for TEE support" "Not support,Support"
+if ((((per.q(CSR:0xFC3))>>26.)&0x1)==0.)
+  group.quad (0xFC3*8)++7.
+      line.quad 0x00 "MTLBCFG_INFO,TLB configuration information"
+          bitfld.quad 0x00 27. "TLB_MAPPING,ITLB/DTLB Mapping method" "Old mapping,New mapping"
+          newline
+          bitfld.quad 0x00 19.--21. "DTLB_SIZE,DTLB size" "No DTLB,,,,8 entry,16 entry,32 entry,64 entry"
+          newline
+          bitfld.quad 0x00 16.--18. "ITLB_SIZE,ITLB size" "No ITLB,,,,8 entry,16 entry,32 entry,64 entry"
+          newline
+          bitfld.quad 0x00 11. "MTLB_NAPOT,TLB supports Svnapot or not" "Not support,Support"
+          newline
+          bitfld.quad 0x00 10. "MTLB_ECC,Main TLB supports ECC or not" "Not support,Support"
+          newline
+          bitfld.quad 0x00 4.--6. "MTLB_WAY,Main TLB ways" "Direct-mapped,2-way,3-way,4-way,5-way,6-way,7-way,8-way"
+          newline
+          bitfld.quad 0x00 0.--3. "MTLB_WAY_ENTRY,Main TLB Entry per way" "8,16,32,64,128,256,512,1024,2048,4096,8192,?..."
+else
+  group.quad (0xFC3*8)++7.
+      line.quad 0x00 "MTLBCFG_INFO,TLB configuration information"
+          bitfld.quad 0x00 27. "TLB_MAPPING,ITLB/DTLB Mapping method" "Old mapping,New mapping"
+          newline
+          bitfld.quad 0x00 19.--26. "DTLB_SIZE,DTLB size" "DTLB entry num - 1"
+          newline
+          bitfld.quad 0x00 12.--18. "ITLB_SIZE,ITLB size" "DTLB entry num - 1"
+          newline
+          bitfld.quad 0x00 11. "MTLB_NAPOT,TLB supports Svnapot or not" "Not support,Support"
+          newline
+          bitfld.quad 0x00 10. "MTLB_ECC,Main TLB supports ECC or not" "Not support,Support"
+          newline
+          bitfld.quad 0x00 4.--6. "MTLB_WAY,Main TLB ways" "Direct-mapped,2-way,3-way,4-way,5-way,6-way,7-way,8-way"
+          newline
+          bitfld.quad 0x00 0.--3. "MTLB_WAY_ENTRY,Main TLB Entry per way" "8,16,32,64,128,256,512,1024,2048,4096,8192,?..."
+endif
+  group.quad (0x170*8)++7.
+      line.quad 0x00 "SMPUSWITCH0,Supervisor context switch register"
+  group.quad (0x171*8)++7.
+      line.quad 0x00 "SMPUSWITCH1,Supervisor context switch register"
+  group.quad (0x1A0*8)++7.
+      line.quad 0x00 "SMPUCFG0,Supervisor physical memory protection configuration"
+  group.quad (0x1A1*8)++7.
+      line.quad 0x00 "SMPUCFG1,Supervisor physical memory protection configuration"
+  group.quad (0x1A2*8)++7.
+      line.quad 0x00 "SMPUCFG2,Supervisor physical memory protection configuration"
+  group.quad (0x1A3*8)++7.
+      line.quad 0x00 "SMPUCFG3,Supervisor physical memory protection configuration"
+  group.quad (0x1B0*8)++7.
+      line.quad 0x00 "SMPUADDR0,Supervisor physical memory protection address register"
+  group.quad (0x1B1*8)++7.
+      line.quad 0x00 "SMPUADDR1,Supervisor physical memory protection address register"
+  group.quad (0X1B2*8)++7.
+      line.quad 0x00 "SMPUADDR2,Supervisor physical memory protection address register"
+  group.quad (0X1B3*8)++7.
+      line.quad 0x00 "SMPUADDR3,Supervisor physical memory protection address register"
+  group.quad (0X1B4*8)++7.
+      line.quad 0x00 "SMPUADDR4,Supervisor physical memory protection address register"
+  group.quad (0X1B5*8)++7.
+      line.quad 0x00 "SMPUADDR5,Supervisor physical memory protection address register"
+  group.quad (0X1B6*8)++7.
+      line.quad 0x00 "SMPUADDR6,Supervisor physical memory protection address register"
+  group.quad (0X1B7*8)++7.
+      line.quad 0x00 "SMPUADDR7,Supervisor physical memory protection address register"
+  group.quad (0X1B8*8)++7.
+      line.quad 0x00 "SMPUADDR8,Supervisor physical memory protection address register"
+  group.quad (0X1B9*8)++7.
+      line.quad 0x00 "SMPUADDR9,Supervisor physical memory protection address register"
+  group.quad (0X1BA*8)++7.
+      line.quad 0x00 "SMPUADDR10,Supervisor physical memory protection address register"
+  group.quad (0X1BB*8)++7.
+      line.quad 0x00 "SMPUADDR11,Supervisor physical memory protection address register"
+  group.quad (0X1BC*8)++7.
+      line.quad 0x00 "SMPUADDR12,Supervisor physical memory protection address register"
+  group.quad (0X1BD*8)++7.
+      line.quad 0x00 "SMPUADDR13,Supervisor physical memory protection address register"
+  group.quad (0X1BE*8)++7.
+      line.quad 0x00 "SMPUADDR14,Supervisor physical memory protection address register"
+  group.quad (0X1BF*8)++7.
+      line.quad 0x00 "SMPUADDR15,Supervisor physical memory protection address register"
+  group.quad (0X1C0*8)++7.
+      line.quad 0x00 "SMPUADDR16,Supervisor physical memory protection address register"
+  group.quad (0X1C1*8)++7.
+      line.quad 0x00 "SMPUADDR17,Supervisor physical memory protection address register"
+  group.quad (0X1C2*8)++7.
+      line.quad 0x00 "SMPUADDR18,Supervisor physical memory protection address register"
+  group.quad (0X1C3*8)++7.
+      line.quad 0x00 "SMPUADDR19,Supervisor physical memory protection address register"
+  group.quad (0X1C4*8)++7.
+      line.quad 0x00 "SMPUADDR20,Supervisor physical memory protection address register"
+  group.quad (0X1C5*8)++7.
+      line.quad 0x00 "SMPUADDR21,Supervisor physical memory protection address register"
+  group.quad (0X1C6*8)++7.
+      line.quad 0x00 "SMPUADDR22,Supervisor physical memory protection address register"
+  group.quad (0X1C7*8)++7.
+      line.quad 0x00 "SMPUADDR23,Supervisor physical memory protection address register"
+  group.quad (0X1C8*8)++7.
+      line.quad 0x00 "SMPUADDR24,Supervisor physical memory protection address register"
+  group.quad (0X1C9*8)++7.
+      line.quad 0x00 "SMPUADDR25,Supervisor physical memory protection address register"
+  group.quad (0X1CA*8)++7.
+      line.quad 0x00 "SMPUADDR26,Supervisor physical memory protection address register"
+  group.quad (0X1CB*8)++7.
+      line.quad 0x00 "SMPUADDR27,Supervisor physical memory protection address register"
+  group.quad (0X1CC*8)++7.
+      line.quad 0x00 "SMPUADDR28,Supervisor physical memory protection address register"
+  group.quad (0X1CD*8)++7.
+      line.quad 0x00 "SMPUADDR29,Supervisor physical memory protection address register"
+  group.quad (0X1CE*8)++7.
+      line.quad 0x00 "SMPUADDR30,Supervisor physical memory protection address register"
+  group.quad (0X1CF*8)++7.
+      line.quad 0x00 "SMPUADDR31,Supervisor physical memory protection address register"
+  group.quad (0X1D0*8)++7.
+      line.quad 0x00 "SMPUADDR32,Supervisor physical memory protection address register"
+  group.quad (0X1D1*8)++7.
+      line.quad 0x00 "SMPUADDR33,Supervisor physical memory protection address register"
+  group.quad (0X1D2*8)++7.
+      line.quad 0x00 "SMPUADDR34,Supervisor physical memory protection address register"
+  group.quad (0X1D3*8)++7.
+      line.quad 0x00 "SMPUADDR35,Supervisor physical memory protection address register"
+  group.quad (0X1D4*8)++7.
+      line.quad 0x00 "SMPUADDR36,Supervisor physical memory protection address register"
+  group.quad (0X1D5*8)++7.
+      line.quad 0x00 "SMPUADDR37,Supervisor physical memory protection address register"
+  group.quad (0X1D6*8)++7.
+      line.quad 0x00 "SMPUADDR38,Supervisor physical memory protection address register"
+  group.quad (0X1D7*8)++7.
+      line.quad 0x00 "SMPUADDR39,Supervisor physical memory protection address register"
+  group.quad (0X1D8*8)++7.
+      line.quad 0x00 "SMPUADDR40,Supervisor physical memory protection address register"
+  group.quad (0X1D9*8)++7.
+      line.quad 0x00 "SMPUADDR41,Supervisor physical memory protection address register"
+  group.quad (0X1DA*8)++7.
+      line.quad 0x00 "SMPUADDR42,Supervisor physical memory protection address register"
+  group.quad (0X1DB*8)++7.
+      line.quad 0x00 "SMPUADDR43,Supervisor physical memory protection address register"
+  group.quad (0X1DC*8)++7.
+      line.quad 0x00 "SMPUADDR44,Supervisor physical memory protection address register"
+  group.quad (0X1DD*8)++7.
+      line.quad 0x00 "SMPUADDR45,Supervisor physical memory protection address register"
+  group.quad (0X1DE*8)++7.
+      line.quad 0x00 "SMPUADDR46,Supervisor physical memory protection address register"
+  group.quad (0X1DF*8)++7.
+      line.quad 0x00 "SMPUADDR47,Supervisor physical memory protection address register"
+  group.quad (0X1E0*8)++7.
+      line.quad 0x00 "SMPUADDR48,Supervisor physical memory protection address register"
+  group.quad (0X1E1*8)++7.
+      line.quad 0x00 "SMPUADDR49,Supervisor physical memory protection address register"
+  group.quad (0X1E2*8)++7.
+      line.quad 0x00 "SMPUADDR50,Supervisor physical memory protection address register"
+  group.quad (0X1E3*8)++7.
+      line.quad 0x00 "SMPUADDR51,Supervisor physical memory protection address register"
+  group.quad (0X1E4*8)++7.
+      line.quad 0x00 "SMPUADDR52,Supervisor physical memory protection address register"
+  group.quad (0X1E5*8)++7.
+      line.quad 0x00 "SMPUADDR53,Supervisor physical memory protection address register"
+  group.quad (0X1E6*8)++7.
+      line.quad 0x00 "SMPUADDR54,Supervisor physical memory protection address register"
+  group.quad (0X1E7*8)++7.
+      line.quad 0x00 "SMPUADDR55,Supervisor physical memory protection address register"
+  group.quad (0X1E8*8)++7.
+      line.quad 0x00 "SMPUADDR56,Supervisor physical memory protection address register"
+  group.quad (0X1E9*8)++7.
+      line.quad 0x00 "SMPUADDR57,Supervisor physical memory protection address register"
+  group.quad (0X1EA*8)++7.
+      line.quad 0x00 "SMPUADDR58,Supervisor physical memory protection address register"
+  group.quad (0X1EB*8)++7.
+      line.quad 0x00 "SMPUADDR59,Supervisor physical memory protection address register"
+  group.quad (0X1EC*8)++7.
+      line.quad 0x00 "SMPUADDR60,Supervisor physical memory protection address register"
+  group.quad (0X1ED*8)++7.
+      line.quad 0x00 "SMPUADDR61,Supervisor physical memory protection address register"
+  group.quad (0X1EE*8)++7.
+      line.quad 0x00 "SMPUADDR62,Supervisor physical memory protection address register"
+  group.quad (0X1EF*8)++7.
+      line.quad 0x00 "SMPUADDR63,Supervisor physical memory protection address register"
+  group.quad (0x107*8)++7.
+      line.quad 0x00 "STVT,Supervisor Trap-handler vector table base address"
+  group.quad (0x146*8)++7.
+      line.quad 0x00 "SINTSTATUS,Supervisor current interrupt level"
+  group.quad (0x148*8)++7.
+      line.quad 0x00 "SSCRATCHCSW,Scratch swap register for multiple privilege modes"
+  group.quad (0x947*8)++7.
+      line.quad 0x00 "JALSNXTI,Jumping to next supervisor interrupt handler address and interrupt-enable register"
+  group.quad (0x948*8)++7.
+      line.quad 0x00 "STVT2,ECLIC non-vectored supervisor interrupt handler address register"
+  group.quad (0x949*8)++7.
+      line.quad 0x00 "PUSHSCAUSE,Push scause to stack"
+  group.quad (0x94a*8)++7.
+      line.quad 0x00 "PUSHSEPC,Push sepc to stack"
+  group.quad (0x9C0*8)++7.
+      line.quad 0x00 "SDCAUSE,Detail information for scause"
+  group.quad (0x7CB*8)++7.
+      line.quad 0x00 "CCM_MBEGINADDR,Machine Mode CCM operation ADDR"
+  group.quad (0x7CC*8)++7.
+      line.quad 0x00 "CCM_MCOMMAND,Machine Mode CCM operation CMD"
+  group.quad (0x7CD*8)++7.
+      line.quad 0x00 "CCM_MDATA,Machine Mode CCM operation ReadBack DATA"
+  group.quad (0x7CE*8)++7.
+      line.quad 0x00 "CCM_SUEN,Supervisor/User mode CCM Control"
+  group.quad (0x5CB*8)++7.
+      line.quad 0x00 "CCM_SBEGINADDR,Supervisor Mode CCM operation ADDR"
+  group.quad (0x5CC*8)++7.
+      line.quad 0x00 "CCM_SCOMMAND,Supervisor Mode CCM operation CMD"
+  group.quad (0x5CD*8)++7.
+      line.quad 0x00 "CCM_SDATA,Supervisor Mode CCM operation ReadBack DATA"
+  group.quad (0x4CB*8)++7.
+      line.quad 0x00 "CCM_UBEGINADDR,User Mode CCM operation ADDR"
+  group.quad (0x4CC*8)++7.
+      line.quad 0x00 "CCM_UCOMMAND,User Mode CCM operation CMD"
+  group.quad (0x4CD*8)++7.
+      line.quad 0x00 "CCM_UDATA,User Mode CCM operation ReadBack DATA"
+  group.quad (0x4CF*8)++7.
+      line.quad 0x00 "CCM_FPIPE,Flush Pipeline CMD"
+  group.quad (0x813*8)++7.
+      line.quad 0x00 "STL_RF_CRC,Controlling CRC enable and clear CRC"
+tree.end
+AUTOINDENT.OFF
+ENDIF
+tree.end
+newline

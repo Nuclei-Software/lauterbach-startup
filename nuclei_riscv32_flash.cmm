@@ -1,0 +1,28 @@
+area.clear
+area
+RESet
+
+system.jtagclock 10MHz
+SYStem.Option.RESetmode NDMRST
+SYStem.cpu RV32
+SETUP.DIS AbiNames
+
+SYStem.Up
+
+; flash burn example
+
+flash.reset
+flash.create 1. 0x20000000--0x2FFFFFFF 0x10000 TARGET LONG
+flash.target 0x80000000 0x80010000 0x1000 ~~~~/flash/byte_rv32/snor3b_template.bin
+flash.erase 0x20000000--0x2008FFFF
+flash.program all
+data.load.binary ~~~~/burn_test.bin 0x20000000 /WORD
+flash.program off
+Data.LOAD.binary ~~~~/burn_test.bin 0x20000000 /compare
+
+IF Found()
+    print "flash program fail!"
+else
+    print "flash program ok!"
+
+enddo
