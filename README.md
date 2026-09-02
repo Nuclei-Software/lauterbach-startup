@@ -1,6 +1,10 @@
 # User Guide
 
-This User Guide primarily explains the usage related to Nuclei Cores. For general Trace32 usage, please refer to the Trace32 manual.
+This user guide primarily list the script and parser files related to Nuclei Cores. 
+
+A simple user guide refer to [TRACE32_RISC-V_User_Guide.md](TRACE32_RISC-V_User_Guide.md).
+
+For more Trace32 usage, please refer to the Trace32 manual.
 
 ## 1. Connection Scripts
 
