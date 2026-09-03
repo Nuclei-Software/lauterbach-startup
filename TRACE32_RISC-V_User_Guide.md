@@ -1,4 +1,4 @@
-# TRACE32 RISC-V 用户使用指南
+# Nuclei RISC-V 处理器 TRACE32 调试指南
 
 - [1. 概述](#1-概述)
 - [2. 基本调试使用](#2-基本调试使用)
@@ -125,7 +125,7 @@ SYStem.Up                                       ; Resets SoC and enters debug mo
 
 ![jtag_detect](./pic/jtag_detect.jpg)
 
-实际的 AMP 双核菊花链脚本（[`nuclei_riscv32_jtagchain_dmi.cmm`](nuclei_riscv32_jtagchain_dmi.cmm)）还会通过 `SYStem.CONFIG.CoreNumber`、`CORE.ASSIGN` 声明核数，并用 `SYStem.attach` 附着到已上电运行的目标，不再重复 `SYStem.Up`。
+完整的AMP双核连接脚本可参考本仓库中（[`nuclei_riscv32_jtagchain_dmi.cmm`](nuclei_riscv32_jtagchain_dmi.cmm)），此脚本因为bitstream原因，没有使用system.up， 而是用system.attach，system.up会复位bitstream，system.attach不会复位bitstream，使用时请根据具体情况选择。
 
 ---
 
