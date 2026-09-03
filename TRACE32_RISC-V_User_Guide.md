@@ -125,7 +125,7 @@ SYStem.Up                                       ; Resets SoC and enters debug mo
 
 ![jtag_detect](./pic/jtag_detect.jpg)
 
-完整的AMP双核连接脚本可参考本仓库中（[`nuclei_riscv32_jtagchain_dmi.cmm`](nuclei_riscv32_jtagchain_dmi.cmm)），此脚本因为bitstream原因，没有使用system.up， 而是用system.attach，system.up会复位bitstream，system.attach不会复位bitstream，使用时请根据具体情况选择。
+完整的 AMP 双核连接脚本可参考本仓库中（[`nuclei_riscv32_jtagchain_dmi.cmm`](nuclei_riscv32_jtagchain_dmi.cmm)），此脚本因为bitstream原因，没有使用`SYStem.Up`，而是用`SYStem.Attach`，`SYStem.Up`会复位bitstream，`SYStem.Attach`不会复位bitstream，使用时请根据具体情况选择。
 
 ---
 
@@ -175,7 +175,7 @@ SYStem.Up                                       ; Resets SoC and enters debug mo
 | :--- | :--- | :--- |
 | 打开寄存器窗口 | `Register` | 显示当前核心的所有通用寄存器 |
 | 读取/打印寄存器 | `PRINT Register(PC)` | 打印指定寄存器值（如 PC） |
-| 修改寄存器值 | `Register.Set PC 0xfdfc9000` | 将 PC 修改为指定地址 |
+| 修改寄存器值 | `Register.Set PC 0xFDFC9000` | 将 PC 修改为指定地址 |
 
 > **提示**：读取寄存器使用 `PRINT Register(<reg>)` 或快捷函数 `r(<reg>)`，TRACE32 没有 `r.get` 命令。
 
