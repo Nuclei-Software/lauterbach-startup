@@ -1,29 +1,57 @@
-# User Guide
+# Nuclei TRACE32 Startup Scripts
 
-This user guide primarily list the script and parser files related to Nuclei Cores. 
+This repository provides TRACE32 (Lauterbach) startup and utility scripts for debugging
+Nuclei RISC-V processors on the Nuclei EvalSoC evaluation platform.
 
-A simple user guide refer to [TRACE32_RISC-V_User_Guide.md](TRACE32_RISC-V_User_Guide.md).
-
-For more Trace32 usage, please refer to the Trace32 manual.
+- A step-by-step guide (in Chinese) is available at
+  [TRACE32_RISC-V_User_Guide.md](TRACE32_RISC-V_User_Guide.md).
+- For general TRACE32 usage, please refer to the TRACE32 manual installed with your
+  debugger (see the *TRACE32 PDF documents* section in the guide).
 
 ## 1. Connection Scripts
 
-- `nuclei_riscv32.cmm`: Connects to a Nuclei RV32 single-core via JTAG.
-- `nuclei_riscv32_smpx.cmm`: Connects to a Nuclei RV32 SMP multi-core via JTAG, where `x` is the number of cores.
-- `nuclei_riscv64.cmm`: Connects to a NUCLEI RV64 single-core via JTAG.
-- `nuclei_riscv64_smpx.cmm`: Connects to a Nuclei RV64 SMP multi-core via JTAG, where `x` is the number of cores.
+All connection scripts assume a Nuclei RISC-V core accessed through the RISC-V Debug
+Module (DM). Scripts are provided for both RV32 and RV64 cores.
 
-- `nuclei_riscv32_flash.cmm`: Connects to a Nuclei Evalsoc RV32 single-core via JTAG and programs the Evalsoc XIP flash. The script uses `burn_test.bin` as the file to be programmed.
-- `nuclei_riscv64_flash.cmm`: Connects to a Nuclei Evalsoc RV64 single-core via JTAG and programs the Evalsoc XIP flash. The script uses `burn_test.bin` as the file to be programmed.
+### Single-core (JTAG)
 
-- `nuclei_riscv32_cjtag.cmm`: Connects to a Nuclei RV32 single-core via cJTAG.
-- `nuclei_riscv64_cjtag.cmm`: Connects to a Nuclei RV64 single-core via cJTAG.
+- `nuclei_riscv32.cmm` / `nuclei_riscv64.cmm`: Connect to a Nuclei RV32/RV64
+  single-core SoC via a standard JTAG interface. These scripts configure the
+  JTAG debug port (RVDMIAP) explicitly before bringing the system up.
 
-**Note:** Evalsoc is the Nuclei evaluation platform. For more details, please refer to the *Nuclei_Processor_Integration_Guide.pdf*.
+### Multi-core SMP
+
+- `nuclei_riscv32_smp2.cmm` / `nuclei_riscv32_smp4.cmm` / `nuclei_riscv32_smp8.cmm`:
+  Connect to a Nuclei RV32 SMP SoC with 2/4/8 cores via JTAG.
+- `nuclei_riscv64_smp2.cmm` / `nuclei_riscv64_smp4.cmm` / `nuclei_riscv64_smp8.cmm`:
+  Connect to a Nuclei RV64 SMP SoC with 2/4/8 cores via JTAG.
+
+### Multi-core AMP (JTAG daisy chain)
+
+- `nuclei_riscv32_jtagchain_dmi.cmm`: Connect to a Nuclei RV32 AMP SoC whose cores
+  share one JTAG port but sit on separate TAPs (daisy-chained). It attaches to the
+  already-running cores with `SYStem.Attach` instead of resetting the SoC.
+
+### cJTAG
+
+- `nuclei_riscv32_cjtag.cmm` / `nuclei_riscv64_cjtag.cmm`: Connect to a Nuclei
+  RV32/RV64 single-core SoC via the 2-pin cJTAG interface (implicit DMI).
+
+### Flash programming
+
+- `nuclei_riscv32_flash.cmm` / `nuclei_riscv64_flash.cmm`: Connect to a Nuclei
+  EvalSoC RV32/RV64 single-core via JTAG and program the EvalSoC XIP flash. The
+  scripts use `burn_test.bin` as the file to be programmed; the flash programming
+  algorithms live under [`flash/`](flash/).
+
+> **Note:** EvalSoC is the Nuclei evaluation platform. For more details, please
+> refer to the *Nuclei_Processor_Integration_Guide.pdf*.
 
 ## 2. Nuclei Custom Instructions and CSRs
 
-To load Nuclei custom instructions or CSRs, use the following commands in the connection script or the Trace32 command line:
+Nuclei cores may use custom instructions and custom CSRs. To make TRACE32 decode
+them as readable mnemonics and register names, load the corresponding parser files
+in the connection script or from the TRACE32 command line:
 
 - `apu.load nuclei_custom_inst_parser.dll`
 
