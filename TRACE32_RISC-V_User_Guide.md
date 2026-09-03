@@ -1,284 +1,328 @@
 # TRACE32 RISC-V 用户使用指南
 
+- [1. 概述](#1-概述)
+- [2. 基本调试使用](#2-基本调试使用)
+  - [2.1 TRACE32 基本设置](#21-trace32-基本设置)
+  - [2.2 TRACE32 DM 配置](#22-trace32-dm-配置)
+    - [2.2.1 隐式配置 JTAG-DTM](#221-隐式配置-jtag-dtm)
+    - [2.2.2 显式配置 JTAG-DTM](#222-显式配置-jtag-dtm)
+  - [2.3 单核调试](#23-单核调试)
+  - [2.4 多核 SMP 调试](#24-多核-smp-调试)
+  - [2.5 多核 AMP 调试](#25-多核-amp-调试)
+  - [2.6 自定义指令与 CSR 解析](#26-自定义指令与-csr-解析)
+- [3. 基本调试命令](#3-基本调试命令)
+  - [3.1 寄存器读写](#31-寄存器读写)
+  - [3.2 Memory 读写](#32-memory-读写)
+  - [3.3 CSR 读写](#33-csr-读写)
+  - [3.4 单步执行](#34-单步执行)
+  - [3.5 断点设置](#35-断点设置)
+  - [3.6 Watchpoint (数据观察点)](#36-watchpoint-数据观察点)
+  - [3.7 MMU 页表查询](#37-mmu-页表查询)
+  - [3.8 程序加载与符号下载](#38-程序加载与符号下载)
+- [4. 操作系统调试](#4-操作系统调试)
+- [5. Flash 烧录](#5-flash-烧录)
+- [6. Cross Trigger 调试功能](#6-cross-trigger-调试功能)
+- [7. Authentic 鉴权调试功能](#7-authentic-鉴权调试功能)
+- [8. Trace 功能](#8-trace-功能)
+- [9. 相关资源与参考文档](#9-相关资源与参考文档)
+
+---
+
 ## 1. 概述
 
-TRACE32 调试器全面支持 RISC-V 架构，基于 RISC-V Debug Specification 提供完整的调试与跟踪解决方案。核心功能包括：
+Lauterbach TRACE32 调试器全面支持 RISC-V 架构，基于 RISC-V Debug Specification 提供完整的调试与跟踪解决方案。核心功能包括：
 
-- **JTAG 调试**：通过 JTAG-DTM 访问 Debug Module，支持单核、多核 SMP/AMP 调试。
+- **JTAG 调试**：通过 JTAG-DTM 访问 Debug Module (DM)，支持单核、多核 SMP/AMP 调试。
+- **OS 相关调试**：原生支持裸机、FreeRTOS（单核/多核）以及 Linux 内核与任务感知调试。
+- **E-Trace 数据跟踪**：支持数据读写跟踪、地址/值匹配及跳转优化，适用于系统性能与流程分析。
 
-- **OS 相关调试**：原生支持裸机、FreeRTOS（单核/多核）及 Linux 内核调试。
-
-- **E-Trace 数据跟踪**：支持数据读写跟踪、地址/值匹配及跳转优化，适用于性能分析。
-
-详细参考：TRACE32 手册 → *RISC-V Introduction*
+> **适用范围**：本文面向 **Nuclei RISC-V 处理器** 的 TRACE32 调试。文中涉及的验证与测试均在 **Nuclei EvalSoC** 评估平台（FPGA bitstream）上完成；EvalSoC 内嵌的 CPU 可为 Nuclei RISC-V 200 - 1000 系列的全系 RV32/RV64 处理器，不同测试场景会使用对应的 FPGA bitstream，CMM 脚本文件名中的 `riscv32`/`riscv64` 与目标处理器的指令集架构一一对应。如需要相关 bitstream 文件，请联系芯来技术支持（AE）获取。
 
 ---
 
 ## 2. 基本调试使用
 
-### 2.1 Trace32 基本设置
+### 2.1 TRACE32 基本设置
 
-- **Add Configuration**
+初次使用时，可通过 TRACE32 启动配置管理器（T32Start）建立调试环境配置：
 
-打开trace32 软件，右键点击Configuration Tree, 依次选择 Add->Configuration
+1. **Add Configuration**：打开 TRACE32 软件，在 Configuration Tree 区域右键点击，选择 `Add -> Configuration`，按 `F2` 重命名配置（例如 `nuclei_config`）。
+   ![Add Configuration](./pic/config1.jpg)
 
-![Add Configuration](./pic/config1.jpg)
+2. **Add Podbus Device Chain**：
+   ![Add Device Chain](./pic/config2.jpg)
 
-F2 修改Configure名字，比如nuclei_config
+3. **Add Power Device**：根据当前使用的 TRACE32 硬件探头类型选择对应设备。
+   ![Add Power Device](./pic/config3.jpg)
 
-- **Add Podbus Device Chain**
+4. **Choose Connection Type**：根据主机与调试器的连接方式选择（如使用 USB 数据线，选择 `USB`）。
+   ![Choose Connection Type](./pic/config4.jpg)
 
-![Add Device Chain](./pic/config2.jpg)
+5. **Add PowerView Instance**：
+   ![Add PowerView Instance](./pic/config5.jpg)
+   右键点击实例，将 Target 设置为 `RISC-V`：
+   ![Add PowerView Instance-riscv](./pic/config6.jpg)
 
-- **Add Power Device**
+6. **Start 启动**：点击右侧 `Save` 保存配置，再点击 `Start` 即可进入 TRACE32 PowerView 主界面（未连接目标板 JTAG 时右下角显示 PowerDown 状态为正常现象）。
+   ![Main Interface](./pic/main_interface.jpg)
 
-根据当前使用的Trace32硬件设备类型选择
+7. **Run Script**：在主界面选择并执行对应的 CMM 启动脚本。
+   ![Run Script](./pic/run_script.jpg)
 
-![Add Power Device](./pic/config3.jpg)
+> 详细配置说明可参考 TRACE32 安装目录下的 `pdf/app_t32start.pdf`。
 
-- **Choose Connection Type**
+---
 
-根据Trace32和电脑的连接方式选择，当前使用的是USB线连接电脑，Connection Type选择USB
+### 2.2 TRACE32 DM 配置
 
-![Choose Connection Type](./pic/config4.jpg)
+调试器需通过 Debug Module Interface (DMI) 访问 DM 寄存器。外部 JTAG 接口访问 RISC-V 调试模块（DM）简图如下：
 
-- **Add PowerView Instance**
-
-![Add PowerView Instance](./pic/config5.jpg)
-
-右键选择Target 为RISC-V
-![Add PowerView Instance-riscv](./pic/config6.jpg)
-
-- **Start**
-
-点击右边`Save` 先保存配置，点击右边`Start` 按钮就可以进入Trace32 主界面, 因为Trace32 还没有通过JTAG连接待调试的开发板，所以图中右下角是PowerDown状态
-
-![Main Interface](./pic/main_interface.jpg)
-
-- **Run Script**
-
-选择要执行的cmm脚本
-![Run Script](./pic/run_script.jpg)
-
-
-详细的用法可以参考trace32 help或者trace32 安装目录下`pdf/app_t32start.pdf`
-
-### 2.2 Trace32 DM 配置
-
-调试器需要知道怎样访问DM模块的寄存器，所以需要配置DM。通过外部 JTAG 接口访问 RISC-V 调试模块（DM）简图：
 ![DM Config](./pic/dm_config.jpg)
 
-#### 2.2.1 隐式配置JTAG-DTM
+#### 2.2.1 隐式配置 JTAG-DTM
 
-如果系统中只有一个JTAG-DTM和一个DM，调试器会自动识别JTAG链参数，不用额外配置。但如果是cJTAG连接需要增加下面的配置：
+若目标系统中仅包含单个 JTAG-DTM 与单个 DM，TRACE32 能够自动识别 JTAG 链参数，无需额外繁琐配置。若使用 2-pin cJTAG 接口，需额外启用 cJTAG 对应选项。
 
+典型 RV64 单核 CMM 配置脚本（若为 cJTAG 需取消注释对应两行）：
+
+```cmm
+RESet                           ; Reset debugger configuration
+
+; SYStem.CONFIG.DebugPortType CJTAG
+; SYStem.CONFIG.CJTAGFLAGS NOTCA NOKEEPER NOHARDESC CMDRTI SKIPDUMMYSP SKIPMASK 0xF CPKTSEL 1
+
+SYStem.JtagClock 10MHz          ; Set JTAG clock frequency
+SYStem.Option.RESetmode NDMRST  ; Select the reset method
+SYStem.CPU RV64                 ; Select the SoC/CPU/core
+SYStem.Up                       ; Resets SoC and enters debug mode
+
+List
 ```
-SYStem.CONFIG.DebugPortType CJTAG
-SYStem.CONFIG.CJTAGFLAGS NOTCA NOKEEPER NOHARDESC CMDRTI SKIPDUMMYSP SKIPMASK 0xF CPKTSEL 1
+
+#### 2.2.2 显式配置 JTAG-DTM
+
+对于复杂的 JTAG 菊花链（Daisy Chain）系统，需使用 `RVDMIAP` 与 `COREDEBUG` 命令手动声明 JTAG 链参数：
+
+```cmm
+RESet
+
+SYStem.JtagClock 10MHz
+SYStem.Option.RESetmode NDMRST
+SYStem.CPU RV64
+
+SYStem.CONFIG RVDMIAP1.DebugSource DebugPort    ; External debug port
+SYStem.CONFIG RVDMIAP1.IRLENGTH 5.              ; Configure JTAG daisy chain
+SYStem.CONFIG RVDMIAP1.IRPRE 0.
+SYStem.CONFIG RVDMIAP1.IRPOST 0.
+SYStem.CONFIG RVDMIAP1.DRPRE 0.
+SYStem.CONFIG RVDMIAP1.DRPOST 0.
+SYStem.CONFIG COREDEBUG.Base DMI:0x0            ; RISC-V DM Base
+
+SYStem.Up                                       ; Resets SoC and enters debug mode
 ```
 
-典型的rv64 cmm脚本如下。如果是cjtag连接，把`;`注释去掉，开启cjtag连接方式。
-   ```shell
-    RESet                           ;Reset debugger configuration
+使用 `SYStem.DETECT.DaisyChain` 命令可自动探测当前扫描链分布。下图是在 EvalSoC 平台（双核 AMP 配置的 bitstream）上，单 JTAG 端口、两 TAP 菊花链相连时的探测情况：
 
-    ;SYStem.CONFIG.DebugPortType CJTAG
-    ;SYStem.CONFIG.CJTAGFLAGS NOTCA NOKEEPER NOHARDESC CMDRTI SKIPDUMMYSP SKIPMASK 0xF CPKTSEL 1
-
-    system.jtagclock 10MHz          ; Set JTAG clock frequency
-    SYStem.Option.RESetmode NDMRST  ; Select the reset method
-    SYStem.cpu RV64                 ;Select the SoC/CPU/core
-    ; 直接连接，TRACE32 会自动通过 JTAG-DTM 去探测 DM
-    SYStem.up                       ;resets soc and enters debug mode
-
-    list
-   ```
-
-#### 2.2.2 显式配置JTAG-DTM
-
-如果复杂JTAG链，需要手动指定JTAG链参数，需要用RVDMIAP和COREDEBUG。典型的rv64 cmm脚本如下：
-
-   ```shell
-    RESet
-
-    system.jtagclock 10MHz
-    SYStem.Option.RESetmode NDMRST
-    SYStem.cpu RV64
-
-    SYStem.CONFIG RVDMIAP1.DebugSource DebugPort    ;External debug port
-    SYStem.CONFIG RVDMIAP1.IRLENGTH 5.              ;Configure JTAG daisy chain
-    SYStem.CONFIG RVDMIAP1.IRPRE 0.
-    SYStem.CONFIG RVDMIAP1.IRPOST 0.
-    SYStem.CONFIG RVDMIAP1.DRPRE 0.
-    SYStem.CONFIG RVDMIAP1.DRPOST 0.
-    SYStem.CONFIG COREDEBUG.Base DMI:0x0            ;RISC-V DM
-
-    SYStem.Up                                       ;resets soc and enters debug mode
-   ```
-
-`SYStem.DETECT.DaisyChain` 命令可以探测出JTAG情况，下面图是N300 AMP两个core，一个JTAG Port，两个TAP用jtag-chain连接的情况：
 ![jtag_detect](./pic/jtag_detect.jpg)
 
-其cmm 脚本可参考`https://github.com/Nuclei-Software/lauterbach-startup` 中nuclei_riscv32_jtagchain_dmi.cmm
+实际的 AMP 双核菊花链脚本（[`nuclei_riscv32_jtagchain_dmi.cmm`](nuclei_riscv32_jtagchain_dmi.cmm)）还会通过 `SYStem.CONFIG.CoreNumber`、`CORE.ASSIGN` 声明核数，并用 `SYStem.attach` 附着到已上电运行的目标，不再重复 `SYStem.Up`。
 
-详细参考：TRACE32 debugger_riscv.pdf → *Quick Start for Debug Module Configuration*
-
+---
 
 ### 2.3 单核调试
 
-可从https://github.com/Nuclei-Software/lauterbach-startup 下载对应ARCH的cmm脚本连接CPU核，
-比如用nuclei_riscv64.cmm，连接rv64 单核SOC。
+使用本仓库提供的单核 CMM 脚本即可连接目标 CPU。例如使用 [`nuclei_riscv64.cmm`](nuclei_riscv64.cmm) 连接 RV64 单核 SoC：
+
 ![rv64_1core_connect](./pic/1core_connect.jpg)
 
 ### 2.4 多核 SMP 调试
 
-可从https://github.com/Nuclei-Software/lauterbach-startup 下载对应ARCH的cmm脚本连接CPU核，
-比如用nuclei_riscv64_smp2.cmm，连接rv64 SMP2的SOC，多核的可以看到界面下底部有数据0，表示逻辑core0，可以右键点击切换核心，单核是没有的。
+使用本仓库对应的 SMP 脚本（如 [`nuclei_riscv64_smp2.cmm`](nuclei_riscv64_smp2.cmm) 或 `nuclei_riscv32_smp<x>.cmm`）连接多核 SoC。连接成功后，主界面底部状态栏会显示当前逻辑核心编号（如 `0` 代表 core 0），右键可快捷切换核心上下文；单核连接时无此指示：
+
 ![rv64_smp2_connect](./pic/smp2_connect.jpg)
 
 ### 2.5 多核 AMP 调试
 
-可从https://github.com/Nuclei-Software/lauterbach-startup 下载对应ARCH的cmm脚本连接CPU核，
-比如用nuclei_riscv32_jtagchain_dmi.cmm，连接rv32 AMP的SOC。
+对于非对称多核系统，可使用链式 DMI 脚本（例如 [`nuclei_riscv32_jtagchain_dmi.cmm`](nuclei_riscv32_jtagchain_dmi.cmm)）连接各独立核心进行调试：
+
 ![rv32_amp_connect](./pic/amp_connect.jpg)
 
-### 2.6 自定义指令与CSR解析
+### 2.6 自定义指令与 CSR 解析
 
-如果程序中有用到NUCLEI 自定义的指令或者自定义CSR，需要加载解析文件Trace32才能解析成对应的指令或者CSR，否则界面显示是数字，不是对应名字的指令或CSR。
+若应用程序使用了芯来（Nuclei）自定义扩展指令或自定义 CSR，需加载对应的解析插件，以便 TRACE32 将机器码与地址解析为可读的助记符和寄存器名。
 
-从https://github.com/Nuclei-Software/lauterbach-startup 下载解析NUCLEI自定义指令的解析文件`nuclei_custom_inst_parser.dll` , 用`apu.load` 命令加载
-`apu.load nuclei_custom_inst_parser.dll`
+- **加载自定义指令解析库**（使用本仓库提供的 [`nuclei_custom_inst_parser.dll`](nuclei_custom_inst_parser.dll)）：
+  ```cmm
+  APU.LOAD nuclei_custom_inst_parser.dll
+  ```
 
-从https://github.com/Nuclei-Software/lauterbach-startup 下载解析NUCLEI自定义CSR的解析文件`nuclei_custom_csr_parser.per` , 用`per` 命令加载
-`per nuclei_custom_csr_parser.per`
+- **加载自定义 CSR 解析文件**（使用本仓库提供的 [`nuclei_custom_csr_parser.per`](nuclei_custom_csr_parser.per)）：
+  ```cmm
+  PER nuclei_custom_csr_parser.per
+  ```
 
 ---
 
 ## 3. 基本调试命令
 
-可以使用Trace32主界面上的按钮来调试，包括step, step.over, go, break, memory, register, watch, break, stack 等。
-![main_debug](./pic/main_debug.jpg)
+除了使用工具栏上的图形按钮（Step、Step.Over、Go、Break、Memory、Register、Watch 等）外，所有操作均可在底部命令行直接输入。TRACE32 命令不区分大小写。
 
-除了界面上按钮直接调试外，可以在主界面的底部输入框中输入命令，比如常见的break命令，就是停止cpu执行，下面列举了一些命令，命令字符串不区分大小写，更多详情请参考TRACE32 手册。
+![main_debug](./pic/main_debug.jpg)
 
 ### 3.1 寄存器读写
 
-- 显示全部通用寄存器：`Register`
-- 读单个寄存器：`print r(reg)`, 比如显示pc值：print r(pc)
-- 写单个寄存器：`r.set reg addr`, 比如修改pc值为0xfdfc9000：`r.set PC 0xfdfc9000`
+| 操作 | 命令示例 | 说明 |
+| :--- | :--- | :--- |
+| 打开寄存器窗口 | `Register` | 显示当前核心的所有通用寄存器 |
+| 读取/打印寄存器 | `PRINT Register(PC)` | 打印指定寄存器值（如 PC） |
+| 修改寄存器值 | `Register.Set PC 0xfdfc9000` | 将 PC 修改为指定地址 |
 
-*注：没有`r.get` 命令*
+> **提示**：读取寄存器使用 `PRINT Register(<reg>)` 或快捷函数 `r(<reg>)`，TRACE32 没有 `r.get` 命令。
 
 ### 3.2 Memory 读写
 
-- 读写内存：`Data.Dump`、`Data.Set`
-  `data.dump addr`: 访问addr地址内容
-  `data.dump A:phy_addr`: 直接访问物理地址内容
-  `data.dump E:addr`: cpu不停下来，访问地址内容
+TRACE32 使用 `Data.Dump` 和 `Data.Set` 访问内存，配合访问类（Access Class）前缀支持不同的访问模式：
 
-`A`, `E` 是不同access class，更多详情参考Trace32文档。
+| 操作 | 命令示例 | 说明 |
+| :--- | :--- | :--- |
+| 内存查看 | `Data.Dump 0x80000000` | 查看指定逻辑/虚拟地址内容 |
+| 物理地址查看 | `Data.Dump A:0x80000000` | 绕过 MMU/缓存，直接通过物理地址访问 |
+| 运行态实时查看 | `Data.Dump E:0x80000000` | CPU 运行（不停机）状态下访问内存内容 |
+| 内存写入 (Byte/Long) | `Data.Set D:0x80000000 %Long 0x12345678` | 在指定地址写入 32-bit 数据 |
 
 ### 3.3 CSR 读写
 
-rv64读取单个csr:(mstatus csr 地址是0x300)
+访问 RISC-V 控制与状态寄存器（CSR）需在地址前添加 `CSR:` 前缀，当前需使用十六进制地址访问：
+
+```cmm
+; RV64 读取 CSR (例如 mstatus 地址为 0x300)
 PRINT Data.Quad(CSR:0x300)
 
-rv32读取单个csr:
+; RV32 读取 CSR
 PRINT Data.Long(CSR:0x300)
 
-rv64 写val值到csr 0x300(mstatus)
+; RV64 向 CSR 0x300 写入 val 值（示例：mstatus）
 Data.Set CSR:0x300 %LE %Quad val
 
-读一片csr:
-Data.dump CSR:0x300
-
-*注：Trace32 当前通过命令访问RISC-V CSR不能用名称，需要用地址*
+; 批量查看一段连续 CSR 内容
+Data.Dump CSR:0x300
+```
 
 ### 3.4 单步执行
 
-- 单步：`Step`
-  若当前是汇编模式，则执行一条指令；若在HLL（高级语言）源码模式，则执行一行C代码，类似gdb中s命令或者si命令
-- 汇编单步：`Step.asm`
-  无论当前显示模式如何，都只执行一条汇编指令，类似gdb中si命令
-- 单步跳过：`Step.Over`
-  执行当前函数调用，但不会进入其内部，而是停在该函数返回后的下一条语句，类似gdb中next命令
+| 操作 | 命令 | 说明 |
+| :--- | :--- | :--- |
+| 源码/汇编单步 | `Step` | HLL 模式下单步一行 C 代码；汇编模式下执行一条指令（类似 GDB `s`/`si`） |
+| 纯汇编单步 | `Step.asm` | 强制执行一条底层汇编指令（类似 GDB `si`） |
+| 单步跳过 | `Step.Over` | 步过函数调用（类似 GDB `n`） |
+| 执行至返回 | `Step.Out` | 运行直至当前函数返回（类似 GDB `finish`） |
 
-### 3.5 断点
+### 3.5 断点设置
 
-- 软件断点：`Break.Set`
-  在某个地址设置程序断点，比如：`Break.Set 0x0C008000`
-- 硬件断点：`Break.Set /onchip`
-  在某个地址设置程序断点，比如：`Break.Set 0x0C008000 /Onchip`
-- 删除断点： `break.delete`
-  删除某断点，比如：`Break.delete 0x0C008000`
-- 关闭断点： `break.disable`
+```cmm
+; 设置软件断点
+Break.Set 0x0C008000
+
+; 设置芯片硬件断点 (Onchip Breakpoint)
+Break.Set 0x0C008000 /Onchip
+
+; 删除指定地址断点
+Break.Delete 0x0C008000
+
+; 临时禁用断点
+Break.Disable 0x0C008000
+
+; 删除所有断点
+Break.Delete /All
+```
 
 ![break_set](./pic/break_set.jpg)
 
-### 3.6 Watchpoint
+### 3.6 Watchpoint (数据观察点)
 
-还是基于break.set 命令，只是增加了访问类型
-```
-; Stop the program execution at a write access to 0xfd76b9e8
-break.set 0xfd76b9e8 /write /onchip
+基于 `Break.Set` 命令配合访问属性与条件触发：
 
-; Stop the program execution at the instruction address 0x2228 only if 
-; the contents of Register R7 is greater 5.
+```cmm
+; 1. 写访问触发硬件观察点
+Break.Set 0xFD76B9E8 /Write /Onchip
+
+; 2. 变量符号观察点（需先加载 elf 符号表）
+Break.Set global_counter /Write
+
+; 3. 条件断点：当执行至 0x2228 且 R7 寄存器值大于 5 时中断
 Break.Set 0x2228 /Program /CONDition Register(R7)>5
 
-; Stop the program execution at the instruction address 0x2228 only if
-; the contents of address 0x1234 has value of 0x55.
-`Break.Set 0x2228 /Program /CONDition Data.Word(D:0x1234)==0x55
+; 4. 条件断点：当执行至 0x2228 且内存 0x1234 处的值为 0x55 时中断
+Break.Set 0x2228 /Program /CONDition Data.Word(D:0x1234)==0x55
 ```
+
 ![watch_point](./pic/watch_point.jpg)
 
+### 3.7 MMU 页表查询
+
+对于运行带 MMU 系统的平台（如 Linux），可直接查询虚拟地址到物理地址的映射：
+
+```cmm
+MMU.List.PageTable
 ```
-; Stop the program execution when write global_counter var，need load symbol file
-Break.Set global_counter /Write
+
+### 3.8 程序加载与符号下载
+
+```cmm
+; 1. 下载二进制文件到指定内存地址
+Data.LOAD.Binary burn_test.bin 0x20000000
+
+; 2. 下载 ELF 文件（代码 + 符号表）
+Data.LOAD.Elf application.elf
+
+; 3. 仅加载 ELF 符号表（不下载代码，适用于 Flash/ROM 已固化程序）
+Data.LOAD.Elf application.elf /NoCODE
 ```
-
-详细参考：TRACE32 手册 → *pdf/general_ref_b.pdf*
-
-### 3.7 MMU页表查询
-
-如果系统开启了MMU，可查询页表映射情况：
-
-`mmu.list.pagetable`: 显示系统全部页表映射
-
-### 3.8 下载程序到内存
-
-- 加载bin到指定地址：`data.load.binary your_bin_file address`
-- 加载elf 文件：`data.load.elf your_elf_file`
-- 仅加载elf 符号表：`data.load.elf your_elf_file /nocode`
 
 ---
 
 ## 4. 操作系统调试
 
-以Linux kernel为例说明：
+以 Linux Kernel 调试为例：
 
-连接cpu的cmm脚本中需要下面的配置
-```
-TRANSlation.CONFIG.MMUSPACES ON
-TRANSlation.TableWalk ON
-TRANSlation.ON
-```
+1. **CMM 连接脚本中启用 MMU 空间转换**：
+   ```cmm
+   TRANSlation.CONFIG.MMUSPACES ON
+   TRANSlation.TableWalk ON
+   TRANSlation.ON
+   ```
 
-调试Linux注意一下几点：
-1. 编译的Linux kernel 需要配置：`CONFIG_DEBUG_INFO=y` , 如需更多符号表：`CONFIG_KALLSYMS=y`
-2. 加载vmlinux 符号表：`data.load.elf your_vmlinux_file /nocode`
-3. 如要查看task： `TASK.CONFIG C:\T32\demo\riscv\kernel\linux\awareness\linux.t32`
-4. 通过Linux标签查看相关内容：
-![debug_linux](./pic/debug_linux.jpg)
+2. **内核编译选项要求**：
+   - 必须开启调试信息：`CONFIG_DEBUG_INFO=y`
+   - 建议开启符号表支持：`CONFIG_KALLSYMS=y`
 
-操作系统相关的调试可以参考Trace32 安装目录下的`pdf/rtos_<os>.pdf` 对应的文档。
+3. **加载内核符号文件**：
+   ```cmm
+   Data.LOAD.Elf vmlinux /NoCODE
+   ```
+
+4. **加载 Linux Awareness 插件**：
+   ```cmm
+   TASK.CONFIG ~~/demo/riscv/kernel/linux/awareness/linux.t32
+   ```
+
+5. **查看 Linux 任务与系统状态**：
+   通过顶部菜单的 Linux 标签页，可直接查看 Processes、Modules、Mounts、cgroups 等系统运行时状态。
+   ![debug_linux](./pic/debug_linux.jpg)
+
+> 详细 RTOS 调试指南（如 FreeRTOS、RT-Thread 等）请参阅 TRACE32 官方安装目录下的 `pdf/rtos_<os>.pdf`。
 
 ---
 
 ## 5. Flash 烧录
 
-可从https://github.com/Nuclei-Software/lauterbach-startup 下载对应ARCH的cmm脚本（nuclei_riscv64_flash.cmm用于rv64，nuclei_riscv32_flash.cmm用于rv32）和flash目录，cmm脚本连接CPU核进行flash烧录，burn_test.bin是待烧录的文件，flash目录中是烧录工具。
+本仓库提供了针对芯来评估平台（EvalSoC）的 Flash 烧录 CMM 脚本及算法目录（[`nuclei_riscv64_flash.cmm`](nuclei_riscv64_flash.cmm) 用于 RV64，[`nuclei_riscv32_flash.cmm`](nuclei_riscv32_flash.cmm) 用于 RV32，配套烧录算法在 [`flash/`](flash/) 目录下）。
 
-下面是把burn_test.bin 名字改为freeloader.bin的烧录图。
+烧录流程简述：
+1. 准备待烧录的二进制固件（示例中使用的测试文件为 [`burn_test.bin`](burn_test.bin)）。
+2. 在 TRACE32 中运行对应架构的 flash 脚本（例如 `nuclei_riscv64_flash.cmm`），脚本会加载 [`flash/`](flash/) 目录下的烧录算法模板、配置 Flash 地址空间、擦除并写入目标固件，最后做回读比对校验。
+
+下图为将 `burn_test.bin` 重命名为 `freeloader.bin` 后进行烧录的界面示例：
 
 ![flash_burn](./pic/flash_burn.jpg)
 
@@ -286,71 +330,67 @@ TRANSlation.ON
 
 ## 6. Cross Trigger 调试功能
 
-Cross Trigger 是将一个核心或硬件线程的调试事件（如遇到断点、进入调试模式）同步地传递给其他核心，使它们能够协同地暂停或恢复运行。
+Cross Trigger（交叉触发）用于将某个 CPU 核心/硬件线程的调试事件（如触发断点、进入 Debug 模式）同步广播给其他核心，实现多核之间的联动暂停（Halt）与恢复运行（Resume）。
 
-Trace32 调试器已支持，只需要把JTAG-DTM配置在cmm脚本中描述清楚就行。
+TRACE32 原生支持 RISC-V 交叉触发特性，只需在 JTAG-DTM 配置阶段完整声明各 Core 的调试端口映射关系。
 
-下面是我们在内部n300 bit上测试的情况：
-
-1. 用https://github.com/Nuclei-Software/lauterbach-startup 中nuclei_riscv32_jtagchain_dmi.cmm 连接cpu
-
-2. 切换不同核心，加载不同elf
-
-  - 逻辑core0 在ILM上跑helloworld
-    ![cross_trigger1](./pic/cross_trigger1.jpg)
-
-  - 逻辑core1 在SRAM上跑helloworld
-    ![cross_trigger2](./pic/cross_trigger2.jpg)
-
-点击运行或者暂停，两者都可以同步运行或暂停，实现了联动。
+交叉触发验证基于 EvalSoC 平台（双核配置的 bitstream）进行：
+1. 运行本仓库中的 [`nuclei_riscv32_jtagchain_dmi.cmm`](nuclei_riscv32_jtagchain_dmi.cmm) 连接芯片各核心；
+2. 为不同核心分别加载测试程序：
+   - Core 0 在 ILM 上运行 HelloWorld：
+     ![cross_trigger1](./pic/cross_trigger1.jpg)
+   - Core 1 在 SRAM 上运行 HelloWorld：
+     ![cross_trigger2](./pic/cross_trigger2.jpg)
+3. 在任意核心点击运行或暂停，其他核心将同步运行或暂停，实现多核硬件联动。
 
 ---
 
-## 7. Authentic 功能
+## 7. Authentic 鉴权调试功能
 
-通过DM auth data寄存器来设置调试密码，实现安全调试功能。以下是Authentic Module与NUCLEI CPU的连接图。
+安全调试机制通过 Debug Module 的 `authdata` 寄存器验证访问密码。Authentic 模块与 Nuclei CPU 的交互结构如下图所示：
 
 ![authentic](./pic/authentic.jpg)
 
-例如在cmm脚本中配置调试密码：authdata 寄存器地址0xC0，用第0个逻辑核心把密码`0x3c3c3c3c`写到authdata 寄存器
+若鉴权未通过，Debug Module 将锁定调试接口，拒绝读取内部核心状态。在 CMM 脚本中完成鉴权配置的示例如下（假设鉴权密码为 `0x3c3c3c3c`，通过逻辑 Core 0 向地址 `0xC0` 的 authdata 寄存器写入）：
 
-```
-core.select 0.
+```cmm
+Core.select 0.
 Data.Set EDMI:0xC0 %LE %Long 0x3c3c3c3c
 ```
 
-当鉴权不成功时候，调试将无法进行。
+> **提示**：用于验证 Authentic 鉴权功能的 EvalSoC FPGA bitstream（已预置鉴权逻辑）芯来已现成提供。由于文件体积较大，默认未放置在 Git 仓库中；如需进行安全鉴权评估与测试，可联系芯来技术支持（AE）获取。
 
-由于鉴权模块需要用户自己实现，我们在内部n300 bit上模拟测试authentic，bit已预设了密码，所以连接cpu时候不会报错，但这不是真实情况，我们只做模拟测试。
+### 鉴权流程演示
 
-1. 用`https://github.com/Nuclei-Software/lauterbach-startup` 中nuclei_riscv32_jtagchain_dmi.cmm 连接cpu
-
-2. 读取DM的dmstatus 寄存器
-
-![authentic1](./pic/authentic1.jpg)
-
-dmstatus：0x4003A3，authenticated（bit7）已验证通过, 这是bitfile预先配置好的。
-
-3. 写authdata 寄存器
-
-下面写正确密码到auth data 都不会导致调试器报错，正确密码：0x3c3c3c3c。
-
-```
-core.select 0.
-Data.Set EDMI:0xC0 %LE %Long 0x3c3c3c3c
-core.select 1.
-Data.Set EDMI2:0xC0 %LE %Long 0x3c3c3c3c
-```
-
-写错误密码后，调试器报错异常：
-`Data.Set EDMI2:0xC0 %LE %Long 0x3c3c3c3d`
-
-![authentic2](./pic/authentic2.jpg)
+1. 使用 [`nuclei_riscv32_jtagchain_dmi.cmm`](nuclei_riscv32_jtagchain_dmi.cmm) 连接 CPU；
+2. 读取 DM 的 `dmstatus` 寄存器状态：
+   ![authentic1](./pic/authentic1.jpg)
+   若 `dmstatus` 为 `0x4003A3`，其中 bit 7 (`authenticated`) 为 1，说明当前处于已认证状态。
+3. 写入密码测试：
+   - 写入正确密码（`0x3c3c3c3c`），调试器正常通信：
+     ```cmm
+     Core.select 0.
+     Data.Set EDMI:0xC0 %LE %Long 0x3c3c3c3c
+     Core.select 1.
+     Data.Set EDMI2:0xC0 %LE %Long 0x3c3c3c3c
+     ```
+   - 若写入错误密码（如 `0x3c3c3c3d`），调试器将报错并拒绝连接：
+     ![authentic2](./pic/authentic2.jpg)
 
 ---
 
 ## 8. Trace 功能
 
-TBD
+*(待补充完善 / TBD)*
 
 ---
+
+## 9. 相关资源与参考文档
+
+- **开源脚本仓库**：[Nuclei Lauterbach Startup Scripts (GitHub)](https://github.com/Nuclei-Software/lauterbach-startup)
+- **TRACE32 官方手册参考**：
+  - `pdf/debugger_riscv.pdf`：*TRACE32 RISC-V Debugger User's Guide*
+  - `pdf/app_t32start.pdf`：*TRACE32 Start Configuration Tool*
+  - `pdf/general_ref_b.pdf`：*TRACE32 Breakpoint & Watchpoint Commands*
+  - `pdf/rtos_linux.pdf`：*TRACE32 Linux Awareness Guide*
+
