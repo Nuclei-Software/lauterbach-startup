@@ -1,0 +1,4 @@
+PARAMETERS &funnel_base &tracesource
+
+SYS.CONFIG.RVFUNNEL1.BASE SB:&funnel_base
+SYS.CONFIG.RVFUNNEL1.TRACESOURCE RVETRACE &tracesource

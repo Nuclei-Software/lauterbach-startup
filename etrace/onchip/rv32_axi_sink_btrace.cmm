@@ -1,0 +1,60 @@
+PMACRO.EXPLICIT          ; 强制显式变量声明
+
+; ============================================================================
+; 全局配置参数
+; ============================================================================
+GLOBAL &elf_file_path
+GLOBAL &rvetrace_base &rvfunnel1_base &rvsmem_base
+GLOBAL &nuclei_home
+
+; 项目和文件路径
+&elf_file_path="C:\Users\Administrator\NucleiStudio_workspace\freertos_rv32\Debug\freertos_rv32.elf"
+
+; 硬件基地址配置（参数化）
+&rvetrace_base=0x10064000    ; RVETrace Module Base Address
+&rvfunnel1_base=0x10060000  ; RV Funnel Base Address
+&rvsmem_base=0x10061000      ; RV AXI SINK Base Address
+&nuclei_home="~~/lauterbach-startup"
+
+; ============================================================================
+; 初始化和系统配置
+; ============================================================================
+PRINT "ELF File: " "&elf_file_path"
+
+; 系统复位和基础配置
+;SBRESET
+SYS.Reset
+WinClear
+SYS.CPU RV32
+SYS.CONFIG.CORENUMBER 1.
+SYS.CONFIG.HART.INDEX 0.
+area
+SYS.UP
+
+; 复位模式和检测配置
+SYS.OPTION RESETMODE NDMRST
+SYS.OPTION RESETDETECTION NONE
+
+; ============================================================================
+; Nuclei ETrace 配置
+; ============================================================================
+PRINT %COLOR.GREEN "Configuring RV Encoder..."
+do &nuclei_home\etrace\nuclei_etrace_encoder_config.cmm "&rvetrace_base" "AUTO" "ON" "fifo" "OFF"
+PRINT %COLOR.GREEN "Configuring RV Funnel..."
+do &nuclei_home\etrace\nuclei_etrace_funnel_config.cmm "&rvfunnel1_base" "0" 
+PRINT %COLOR.GREEN "Configuring RV PIB..."
+do &nuclei_home\etrace\nuclei_etrace_axi_sink_config.cmm "&rvsmem_base" "0xa0100000" "0x30000"
+
+trace.clock 16M
+Data.LOAD.ELF &elf_file_path 
+
+PRINT %COLOR.GREEN "Initializing Trace..."
+
+apu.load &nuclei_home\nuclei_custom_inst_parser.dll
+PER ~~\perriscvetrace.per
+PER &nuclei_home\nuclei_custom_csr_parser.per
+
+PRINT %COLOR.GREEN "Configuration verification passed!"
+
+ENDDO
+

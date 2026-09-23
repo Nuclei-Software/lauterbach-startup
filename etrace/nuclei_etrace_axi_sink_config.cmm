@@ -1,0 +1,19 @@
+
+PARAMETERS &smem_base &mem_base &mem_size 
+
+PRIVATE &mem_limit
+
+&mem_limit=&mem_base+&mem_size-4
+
+sys.config.rvsmemtracesink.base sb:&smem_base
+sys.config.rvsmemtracesink.tracesource rvfunnel1
+
+Onchip.DISable
+DO ~~\demo\riscv\etc\smem-trace\smem-trace-utility.cmm RVSMEMTRACESINK1.0 enable
+DO ~~\demo\riscv\etc\smem-trace\smem-trace-utility.cmm RVSMEMTRACESINK1.0 select_smem_trace
+DO ~~\demo\riscv\etc\smem-trace\smem-trace-utility.cmm RVSMEMTRACESINK1.0 set SINKBASE64  &mem_base
+DO ~~\demo\riscv\etc\smem-trace\smem-trace-utility.cmm RVSMEMTRACESINK1.0 set SINKLIMIT64 &mem_limit
+Onchip.TraceCONNECT RVSMEMTRACESINK1
+Trace.METHOD Onchip
+Onchip.Init
+Onchip
