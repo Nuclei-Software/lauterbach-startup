@@ -1,5 +1,5 @@
 
-PARAMETERS &smem_base &mem_base &mem_size 
+PARAMETERS &smem_base &mem_base &mem_size &mode
 
 PRIVATE &mem_limit
 
@@ -15,5 +15,10 @@ DO ~~\demo\riscv\etc\smem-trace\smem-trace-utility.cmm RVSMEMTRACESINK1.0 set SI
 DO ~~\demo\riscv\etc\smem-trace\smem-trace-utility.cmm RVSMEMTRACESINK1.0 set SINKLIMIT64 &mem_limit
 Onchip.TraceCONNECT RVSMEMTRACESINK1
 Trace.METHOD Onchip
+// stack or fifo
+TRACE.MODE &mode 
+
 Onchip.Init
 Onchip
+
+trace.Init

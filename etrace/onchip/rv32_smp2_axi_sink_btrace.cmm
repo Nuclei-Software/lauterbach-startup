@@ -1,0 +1,81 @@
+PMACRO.EXPLICIT          ; 强制显式变量声明
+
+; ============================================================================
+; 全局配置参数
+; ============================================================================
+GLOBAL &elf_file_path &nuclei_home
+GLOBAL &rvetrace0_base &rvetrace1_base
+GLOBAL &rvfunnel1_base &rvsmem_base
+GLOBAL &trace_dump_base &trace_dump_size
+
+// 变量设置, 用户需要修改如下的配置
+&rvfunnel1_base=0x10060000   ; Funnel基地址 
+&rvsmem_base=0x10061000      ; AXI SINK基地址 
+&rvetrace0_base=0x10064000    ; Encoder基地址
+&rvetrace1_base=0x10065000    ; Encoder基地址
+&nuclei_home="~~/lauterbach-startup" ; nuclei lauterbach-startup仓库本地路径
+&elf_file_path="C:\Users\Administrator\NucleiStudio_workspace\rv32_freertos_smp2\Debug\rv32_freertos_smp2.elf" ; elf文件路径
+&trace_dump_base=0xa4000000  ; trace数据保存内存的基地址
+&trace_dump_size=0x4000000     ; trace数据保存内存的大小, 以字节为单位
+
+IF FILE.EXIST("&nuclei_home/nuclei_custom_inst_parser.dll")==FALSE()
+(
+    PRINT "Please set the correct nuclei_home path"
+    ENDDO
+)
+
+WinClear
+SYS.CPU RV32
+SYS.CONFIG.CORENUMBER 2.
+SYS.CONFIG.HART.INDEX 0. 1.
+CORE.ASSIGN 1. 2.
+SYS.OPTION RESETMODE NDMRST
+SYS.OPTION RESETDETECTION NONE
+area
+SYS.UP
+
+; ============================================================================
+; Nuclei ETrace 配置
+; ============================================================================
+PRINT %COLOR.GREEN "Configuring RV Encoder..."
+
+// nuclei etrace config
+SYS.CONFIG.RVETRACE.TYPE standard
+SYS.CONFIG.RVETRACE.BASE SB:&rvetrace0_base SB:&rvetrace1_base
+
+do &nuclei_home\etrace\nuclei_etrace_encoder_config.cmm "SB:&rvetrace0_base SB:&rvetrace1_base"  \
+                                                        "ON" \
+                                                        "OFF"
+
+PRINT %COLOR.GREEN "Configuring RV Encoder analyze..."
+do &nuclei_home\etrace\nuclei_etrace_analyze_config.cmm "&rvetrace0_base"
+
+PRINT %COLOR.GREEN "Configuring RV Funnel..."
+do &nuclei_home\etrace\nuclei_etrace_funnel_config.cmm "&rvfunnel1_base" \
+                                                       "RVETRACE.0 0 RVETRACE.1 1" 
+PRINT %COLOR.GREEN "Configuring RV AXI SINK..."
+do &nuclei_home\etrace\nuclei_etrace_axi_sink_config.cmm "&rvsmem_base" \
+                                                         "&trace_dump_base" \
+                                                         "&trace_dump_size" \
+                                                        "stack" 
+trace.clock 16M ; 配置trace的时钟
+
+
+IF FILE.EXIST(&elf_file_path)
+(
+    PRINT "ELF File: " "&elf_file_path"
+    Data.LOAD.ELF &elf_file_path 
+)
+ELSE
+(
+    PRINT "文件不存在或无法打开！请额外使用 Data.LOAD.ELF命令加载elf"
+)
+
+PRINT %COLOR.GREEN "Initializing Trace..."
+
+apu.load &nuclei_home\nuclei_custom_inst_parser.dll
+PER ~~\perriscvetrace.per
+PER &nuclei_home\nuclei_custom_csr_parser.per
+
+ENDDO
+

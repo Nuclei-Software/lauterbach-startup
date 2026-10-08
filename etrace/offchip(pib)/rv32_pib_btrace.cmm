@@ -3,51 +3,64 @@ PMACRO.EXPLICIT          ; 强制显式变量声明
 ; ============================================================================
 ; 全局配置参数
 ; ============================================================================
-GLOBAL &elf_file_path
+GLOBAL &elf_file_path &nuclei_home
 GLOBAL &rvetrace_base &rvfunnel1_base &rvpib_base
-GLOBAL &nuclei_home
 
-// 文件路径
-&elf_file_path="C:\Users\Administrator\NucleiStudio_workspace\freertos_rv32\Debug\freertos_rv32.elf"
+// 变量设置, 用户需要修改如下的配置
+&rvfunnel1_base=0x10060000   ; Funnel基地址 
+&rvpib_base=0x10062000       ; RVPIB 基地址
+&rvetrace_base=0x10064000    ; Encoder基地址
+&nuclei_home="~~/lauterbach-startup" // nuclei lauterbach-startup仓库本地路径
+&elf_file_path="C:\Users\Administrator\NucleiStudio_workspace\freertos_rv32\Debug\freertos_rv32.elf" // elf文件路径
 
-; 硬件基地址配置（参数化）
-&rvetrace_base=0x10064000    ; RVETrace Module Base Address
-&rvfunnel1_base=0x10060000  ; RV Funnel Base Address
-&rvpib_base=0x10062000      ; RV PIB Base Address
-&nuclei_home="~~/lauterbach-startup"
-
-; ============================================================================
-; 初始化和系统配置
-; ============================================================================
-PRINT "ELF File: " "&elf_file_path"
+IF FILE.EXIST("&nuclei_home/nuclei_custom_inst_parser.dll")==FALSE()
+(
+    PRINT "Please set the correct nuclei_home path"
+    ENDDO
+)
 
 ; 系统复位和基础配置
-;SBRESET
 SYS.Reset
 WinClear
 SYS.CPU RV32
 SYS.CONFIG.CORENUMBER 1.
 SYS.CONFIG.HART.INDEX 0.
+CORE.ASSIGN 1
 area
-SYS.UP
-
-; 复位模式和检测配置
 SYS.OPTION RESETMODE NDMRST
 SYS.OPTION RESETDETECTION NONE
+SYS.UP
 
 ; ============================================================================
 ; Nuclei ETrace 配置
 ; ============================================================================
 PRINT %COLOR.GREEN "Configuring RV Encoder..."
-do &nuclei_home\etrace\nuclei_etrace_encoder_config.cmm "&rvetrace_base" "AUTO" "ON" "fifo" "OFF"
+do &nuclei_home\etrace\nuclei_etrace_encoder_config.cmm "SB:&rvetrace_base"  \
+                                                        "ON" \
+                                                        "OFF"
+
+PRINT %COLOR.GREEN "Configuring RV Encoder analyze..."
+do &nuclei_home\etrace\nuclei_etrace_analyze_config.cmm "&rvetrace_base"
+
 PRINT %COLOR.GREEN "Configuring RV Funnel..."
-do &nuclei_home\etrace\nuclei_etrace_funnel_config.cmm "&rvfunnel1_base" "0" 
+do &nuclei_home\etrace\nuclei_etrace_funnel_config.cmm "&rvfunnel1_base" \
+                                                       "RVETRACE 0" 
 PRINT %COLOR.GREEN "Configuring RV PIB..."
-do &nuclei_home\etrace\nuclei_etrace_pib_config.cmm "&rvpib_base" "4." 
+do &nuclei_home\etrace\nuclei_etrace_pib_config.cmm "&rvpib_base"  \
+                                                    "4."  \
+                                                    "fifo"
 
 trace.clock 16M
 
-Data.LOAD.ELF &elf_file_path 
+IF FILE.EXIST(&elf_file_path)
+(
+    PRINT "ELF File: " "&elf_file_path"
+    Data.LOAD.ELF &elf_file_path 
+)
+ELSE
+(
+    PRINT "文件不存在或无法打开！请额外使用 Data.LOAD.ELF命令加载elf"
+)
 
 PRINT %COLOR.GREEN "Initializing Trace..."
 

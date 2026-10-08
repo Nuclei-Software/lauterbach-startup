@@ -1,0 +1,124 @@
+PARAMETERS &encoder_base 
+
+
+PRIVATE &offset_0 &offset_4 &offset_8 
+PRIVATE &offset_c
+PRIVATE &offset_10 &offset_40
+PRIVATE &para0 &para1
+PRIVATE &major_ver &minor_ver &rtl_ver
+PRIVATE &xlen &data_width &id_width
+PRIVATE &timestamp_width &time_width &context_width &cause_width
+PRIVATE &has_dtrace
+LOCAL &cmd
+
+&has_dtrace = 0.
+&xlen = 32.
+&data_width = 64.
+&timestamp_width = 0.
+&time_width = 0.
+&context_width = 0.
+&cause_width = 4.
+
+PRINT %COLOR.GREEN "Reading Encoder Hardware Information..."
+PRINT "Encoder Base Address: " %Hex &encoder_base
+
+// 读取各个偏移处的寄存器值
+&offset_0=Data.Long(D:&encoder_base)           ; Offset 0x00 - Status/Control
+&offset_4=Data.Long(D:(&encoder_base+0x04))   ; Offset 0x04 - Version/ID
+&offset_8=Data.Long(D:(&encoder_base+0x08))   ; Offset 0x08 - Configuration
+&offset_c=Data.Long(D:(&encoder_base+0x0C))   ; Offset 0x0C - Debug/Status
+&offset_10=Data.Long(D:(&encoder_base+0x10))   ; Offset 0x10 - data 
+&offset_40=Data.Long(D:(&encoder_base+0x40))   ; Offset 0x10 - trtscontrol 
+&para0=Data.Long(D:(&encoder_base+0x0E00))    ; Offset 0x0E00 - para0 
+&para1=Data.Long(D:(&encoder_base+0x0E04))    ; Offset 0x0E00 - para1 
+
+&timestamp_width=(&offset_40>>24.)
+IF ((&para0&0x1f)>>1)==1
+(
+    &data_width = 64.
+)
+
+&id_width=(&para0&0xffff0000)>>16.
+&time_width=&para1&0xff
+&context_width=(&para1&0xff00)>>8.
+// parse 
+&major_ver=&offset_4&0xf
+&minor_ver=(&offset_4&0xf0)>>4
+&rtl_ver=(&offset_4>>24.)&0xff
+
+IF (&para0&0x1)==0x1
+(
+    &xlen = 64.
+)
+IF (&offset_10&0x1)==0x1
+(
+    &has_dtrace = 1
+)
+IF (&para1&0xf0000)!=0
+(
+    &cause_width = (&para1&0xf0000)>>16.
+)
+
+// 显示原始寄存器值
+PRINT "  encoder [0x00] Register: " %Hex &offset_0
+PRINT "  encoder [0x04] Register: " %Hex &offset_4
+PRINT "  encoder [0x08] Register: " %Hex &offset_8
+PRINT "  encoder [0x0C] Register: " %Hex &offset_c
+PRINT "  encoder [0x0E00] Register: " %Hex &para0
+PRINT "  encoder [0x0E04] Register: " %Hex &para1
+PRINT "    version: v" %d &major_ver "." %d &minor_ver "." %d &rtl_ver
+PRINT "    XLEN: " %d &xlen
+if (&has_dtrace)==1
+(
+PRINT "    DTRACE: "
+PRINT "      DATA_WIDTH : " %d &data_width
+PRINT "      ID_WIDTH : " %d &id_width
+)
+PRINT "    TIMESTAMP_WIDTH: " %d &timestamp_width
+PRINT "    TIME_WIDTH: " %d &time_width
+PRINT "    CONTEXT_WIDTH: " %d &context_width
+PRINT "    CAUSE_WIDTH: " %d &cause_width
+
+// 解析和显示状态位
+PRINT "Register Analysis:"
+
+//; 示例：检查低字节是否为使能状态
+IF (&offset_0&0x01)==0x01
+(
+    PRINT %COLOR.GREEN "  Encoder Status: ENABLED"
+)
+ELSE
+(
+    PRINT %COLOR.RED "  Encoder Status: NOT ENABLED (0x" %Hex &offset_0 ")"
+)
+
+; RVETrace参数配置（地址宽度和编码参数）  
+&cmd = "RVETRACE.PARAMETERS.ADDResses &xlen 0. &xlen"
+PRINT "&cmd"
+RVETRACE.PARAMETERS.ADDResses &xlen 0. &xlen
+
+&cmd = "RVETRACE.PARAMETERS.ENCAPsulation 8. &timestamp_width &has_dtrace"
+PRINT "&cmd"
+RVETRACE.PARAMETERS.ENCAPsulation 8. &timestamp_width &has_dtrace    
+
+//privilege_width, time_width, context_width, ecause_width, encoder_mode_width, ioptions_width, doptions_width
+&cmd = "RVETRACE.PARAMETERS.Format3 3. &time_width &context_width &cause_width 1. 12. 8."
+PRINT "&cmd"
+RVETRACE.PARAMETERS.Format3 3. &time_width &context_width &cause_width 1. 12. 8. 
+
+IF (&has_dtrace)==1
+(
+//数据追踪配置
+&cmd = "RVETRACE.PARAMETERS.DOPTIONS.NoDATA 1."
+PRINT "&cmd"
+RVETRACE.PARAMETERS.DOPTIONS.NoDATA 1.
+
+&cmd = "RVETRACE.PARAMETERS.DOPTIONS.NoADDRess 0."
+PRINT "&cmd"
+RVETRACE.PARAMETERS.DOPTIONS.NoADDRess 0.
+
+// format_width=3, data_width=32, compression=NONE, transfer_width=4
+&cmd = "RVETRACE.PARAMETERS.DataTrace 3. &data_width NONE &id_width"
+PRINT "&cmd"
+RVETRACE.PARAMETERS.DataTrace 3. &data_width NONE &id_width
+)
