@@ -1,32 +1,31 @@
 # Nuclei RISC-V 处理器 TRACE32 调试指南
 
-- [Nuclei RISC-V 处理器 TRACE32 调试指南](#nuclei-risc-v-处理器-trace32-调试指南)
-  - [1. 概述](#1-概述)
-  - [2. 基本调试使用](#2-基本调试使用)
-    - [2.1 TRACE32 基本设置](#21-trace32-基本设置)
-    - [2.2 TRACE32 DM 配置](#22-trace32-dm-配置)
-      - [2.2.1 隐式配置 JTAG-DTM](#221-隐式配置-jtag-dtm)
-      - [2.2.2 显式配置 JTAG-DTM](#222-显式配置-jtag-dtm)
-    - [2.3 单核调试](#23-单核调试)
-    - [2.4 多核 SMP 调试](#24-多核-smp-调试)
-    - [2.5 多核 AMP 调试](#25-多核-amp-调试)
-    - [2.6 自定义指令与 CSR 解析](#26-自定义指令与-csr-解析)
-  - [3. 基本调试命令](#3-基本调试命令)
-    - [3.1 寄存器读写](#31-寄存器读写)
-    - [3.2 Memory 读写](#32-memory-读写)
-    - [3.3 CSR 读写](#33-csr-读写)
-    - [3.4 单步执行](#34-单步执行)
-    - [3.5 断点设置](#35-断点设置)
-    - [3.6 Watchpoint (数据观察点)](#36-watchpoint-数据观察点)
-    - [3.7 MMU 页表查询](#37-mmu-页表查询)
-    - [3.8 程序加载与符号下载](#38-程序加载与符号下载)
-  - [4. 操作系统调试](#4-操作系统调试)
-  - [5. Flash 烧录](#5-flash-烧录)
-  - [6. Cross Trigger 调试功能](#6-cross-trigger-调试功能)
-  - [7. Authentic 鉴权调试功能](#7-authentic-鉴权调试功能)
-    - [鉴权流程演示](#鉴权流程演示)
-  - [8. Trace 功能](#8-trace-功能)
-  - [9. 相关资源与参考文档](#9-相关资源与参考文档)
+- [1. 概述](#1-概述)
+- [2. 基本调试使用](#2-基本调试使用)
+  - [2.1 TRACE32 基本设置](#21-trace32-基本设置)
+  - [2.2 TRACE32 DM 配置](#22-trace32-dm-配置)
+    - [2.2.1 隐式配置 JTAG-DTM](#221-隐式配置-jtag-dtm)
+    - [2.2.2 显式配置 JTAG-DTM](#222-显式配置-jtag-dtm)
+  - [2.3 单核调试](#23-单核调试)
+  - [2.4 多核 SMP 调试](#24-多核-smp-调试)
+  - [2.5 多核 AMP 调试](#25-多核-amp-调试)
+  - [2.6 自定义指令与 CSR 解析](#26-自定义指令与-csr-解析)
+- [3. 基本调试命令](#3-基本调试命令)
+  - [3.1 寄存器读写](#31-寄存器读写)
+  - [3.2 Memory 读写](#32-memory-读写)
+  - [3.3 CSR 读写](#33-csr-读写)
+  - [3.4 单步执行](#34-单步执行)
+  - [3.5 断点设置](#35-断点设置)
+  - [3.6 Watchpoint (数据观察点)](#36-watchpoint-数据观察点)
+  - [3.7 MMU 页表查询](#37-mmu-页表查询)
+  - [3.8 程序加载与符号下载](#38-程序加载与符号下载)
+- [4. 操作系统调试](#4-操作系统调试)
+- [5. Flash 烧录](#5-flash-烧录)
+- [6. Cross Trigger 调试功能](#6-cross-trigger-调试功能)
+- [7. Authentic 鉴权调试功能](#7-authentic-鉴权调试功能)
+  - [鉴权流程演示](#鉴权流程演示)
+- [8. Trace 功能](#8-trace-功能)
+- [9. 相关资源与参考文档](#9-相关资源与参考文档)
 
 ---
 
@@ -383,7 +382,18 @@ Data.Set EDMI:0xC0 %LE %Long 0x3c3c3c3c
 
 ## 8. Trace 功能
 
-参见 etrace/README.md 了解Trace功能
+Nuclei 处理器支持 RISC-V E-Trace 标准的指令流跟踪，可选开启 data trace。TRACE32 侧组件按以下顺序配置：
+
+1. **Encoder**：采集指令流（可选 data trace），脚本 `etrace/nuclei_etrace_encoder_config.cmm`
+2. **Encoder 解析参数**：读取 encoder 硬件寄存器，自动配置解码参数，脚本 `etrace/nuclei_etrace_analyze_config.cmm`
+3. **Funnel**：合并多路 encoder 输出，脚本 `etrace/nuclei_etrace_funnel_config.cmm`
+4. **Sink**：
+   - on-chip：AXI sink 将 trace 写入片内 SRAM/DDR，脚本 `etrace/nuclei_etrace_axi_sink_config.cmm`
+   - off-chip：PIB 通过芯片 PAD 输出到外部 trace 探头，脚本 `etrace/nuclei_etrace_pib_config.cmm`
+
+`etrace/` 目录下同时提供了 on-chip / off-chip、单核 / 双核 SMP、branch trace / data trace 的完整示例脚本。
+
+各脚本的参数说明和 demo 用法请见 [etrace/README.md](etrace/README.md)。
 
 ---
 

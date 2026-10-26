@@ -60,3 +60,22 @@ in the connection script or from the TRACE32 command line:
 - `per nuclei_custom_csr_parser.per`
 
   Loads the Nuclei custom CSR parser file `nuclei_custom_csr_parser.per`.
+
+## 3. E-Trace
+
+Nuclei processors support RISC-V E-Trace. The [`etrace/`](etrace/) directory
+contains configuration scripts for each trace component, plus demo scripts for
+on-chip (AXI sink) and off-chip (PIB) trace.
+
+- Common configuration scripts:
+  - `etrace/nuclei_etrace_encoder_config.cmm`: configure the trace encoder.
+  - `etrace/nuclei_etrace_analyze_config.cmm`: read encoder hardware parameters
+    and configure the TRACE32 decoder.
+  - `etrace/nuclei_etrace_funnel_config.cmm`: configure the trace funnel.
+  - `etrace/nuclei_etrace_axi_sink_config.cmm`: configure the on-chip AXI sink.
+  - `etrace/nuclei_etrace_pib_config.cmm`: configure the off-chip PIB.
+- Demo scripts:
+  - `etrace/onchip/`: single-core and dual-core SMP on-chip trace (branch/data).
+  - `etrace/offchip(pib)/`: single-core off-chip trace (branch/data).
+
+See [etrace/README.md](etrace/README.md) for component parameters and demo usage.
